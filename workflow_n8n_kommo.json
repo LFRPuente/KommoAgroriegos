@@ -1,0 +1,154 @@
+{
+  "name": "Kommo Cuentas por Cobrar (Ingesta)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "fileCreated",
+        "fileType": "any",
+        "folderId": "AQUI_TU_ID_DE_CARPETA_EN_DRIVE"
+      },
+      "name": "Google Drive Trigger",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fileId": "={{ $json.id }}"
+      },
+      "name": "Descargar Excel",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "binaryPropertyName": "data",
+        "options": {}
+      },
+      "name": "Leer Excel (Spreadsheet File)",
+      "type": "n8n-nodes-base.spreadsheetFile",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "getAll",
+        "query": "={{ $json['TELEFONO1'] }}",
+        "options": {}
+      },
+      "name": "Buscar Contacto (Kommo)",
+      "type": "n8n-nodes-base.amocrm",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "lead",
+        "operation": "create",
+        "name": "=Factura {{ $('Split In Batches').item.json.DOCUMENTO }} - {{ $('Split In Batches').item.json['RAZON SOCIAL'] }}",
+        "price": "={{ $('Split In Batches').item.json['SALDO DOC'] }}",
+        "customFieldsUi": {
+          "customFieldValues": [
+            {
+              "fieldId": "ID_CAMPO_FECHA_VENCIMIENTO",
+              "value": "={{ $('Split In Batches').item.json['FECHA VENC'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Crear Trato (Kommo)",
+      "type": "n8n-nodes-base.amocrm",
+      "typeVersion": 1,
+      "position": [
+        1250,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Descargar Excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Excel": {
+      "main": [
+        [
+          {
+            "node": "Leer Excel (Spreadsheet File)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Excel (Spreadsheet File)": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Buscar Contacto (Kommo)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Crear Trato (Kommo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

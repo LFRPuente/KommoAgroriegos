@@ -1,0 +1,127 @@
+{
+  "updatedAt": "2026-03-03T22:50:34.646Z",
+  "createdAt": "2026-03-03T22:19:52.780Z",
+  "id": "PRCdA1axuyZ9SMyf",
+  "name": "Kommo Cobranzas - Recordatorios Diario",
+  "description": null,
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "6b478116-dd8a-4e95-a9c5-ee19091384da",
+      "name": "Cron Diario 09:00",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ],
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyDay",
+              "hour": 9,
+              "minute": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "adf104f9-60fe-4f33-81c4-ff98b1f7e9c0",
+      "name": "Reminder Engine (Code)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        300
+      ],
+      "parameters": {
+        "jsCode": "const CFG = {\"baseUrl\": \"https://eduardonolasco18.kommo.com\", \"token\": \"__SET_KOMMO_TOKEN__\", \"pipelineId\": 13158479, \"paidStatusId\": 101465383, \"tag\": \"cobranza_n8n_excel\", \"templateId\": 33648, \"salesbotId\": 71916, \"timezone\": \"America/Mexico_City\", \"fieldIds\": {\"documento\": 1858660, \"telefono\": 1858664, \"fecha_venc_text\": 1858666, \"saldo_pendiente\": 1858672, \"pago_realizado\": 1858674, \"razon_social\": 1858676, \"fecha_venc_date\": 1859896, \"aviso_3d\": 1860878, \"aviso_2d\": 1860880, \"aviso_1d\": 1860882, \"ultimo_hash\": 1860884, \"ultimo_abono\": 1860886}};\n\nfunction fieldVal(lead, fieldId) {\n  const arr = Array.isArray(lead.custom_fields_values) ? lead.custom_fields_values : [];\n  const hit = arr.find((x) => Number(x.field_id) === Number(fieldId));\n  if (!hit || !Array.isArray(hit.values) || hit.values.length === 0) return \"\";\n  const v = hit.values[0].value;\n  return v === null || v === undefined ? \"\" : String(v);\n}\n\nfunction parseDateAny(v) {\n  const s = String(v || \"\").trim();\n  if (!s) return null;\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(s)) return s;\n  if (/^\\d{2}\\/\\d{2}\\/\\d{4}$/.test(s)) {\n    const [mm, dd, yyyy] = s.split(\"/\");\n    return `${yyyy}-${mm}-${dd}`;\n  }\n  if (/^\\d+$/.test(s)) {\n    const n = Number(s);\n    if (Number.isFinite(n)) {\n      const ms = n < 100000000000 ? n * 1000 : n;\n      const dNum = new Date(ms);\n      if (!Number.isNaN(dNum.getTime())) return dNum.toISOString().slice(0, 10);\n    }\n  }\n  const d = new Date(s);\n  if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);\n  return null;\n}\n\nfunction todayIso(tz) {\n  const parts = new Intl.DateTimeFormat(\"en-US\", {\n    timeZone: tz,\n    year: \"numeric\",\n    month: \"2-digit\",\n    day: \"2-digit\",\n  }).formatToParts(new Date());\n  const y = parts.find((p) => p.type === \"year\")?.value;\n  const m = parts.find((p) => p.type === \"month\")?.value;\n  const d = parts.find((p) => p.type === \"day\")?.value;\n  return `${y}-${m}-${d}`;\n}\n\nfunction kommoNowIso() {\n  const d = new Date();\n  const y = d.getUTCFullYear();\n  const m = String(d.getUTCMonth() + 1).padStart(2, \"0\");\n  const day = String(d.getUTCDate()).padStart(2, \"0\");\n  const h = String(d.getUTCHours()).padStart(2, \"0\");\n  const min = String(d.getUTCMinutes()).padStart(2, \"0\");\n  const s = String(d.getUTCSeconds()).padStart(2, \"0\");\n  return `${y}-${m}-${day}T${h}:${min}:${s}+00:00`;\n}\n\nfunction daysBetween(aIso, bIso) {\n  const a = new Date(aIso + \"T00:00:00Z\");\n  const b = new Date(bIso + \"T00:00:00Z\");\n  return Math.round((b.getTime() - a.getTime()) / 86400000);\n}\n\nfunction money(n) {\n  const x = Number(n || 0);\n  return \"$\" + x.toLocaleString(\"en-US\", { minimumFractionDigits: 2, maximumFractionDigits: 2 });\n}\n\nasync function req(method, path, body) {\n  return await this.helpers.httpRequest({\n    method,\n    url: CFG.baseUrl + path,\n    headers: {\n      Authorization: \"Bearer \" + CFG.token,\n      \"Content-Type\": \"application/json\",\n    },\n    body,\n    json: true,\n    returnFullResponse: true,\n    ignoreHttpStatusErrors: true,\n  });\n}\n\nasync function note(leadId, text) {\n  await req(\"POST\", \"/api/v4/leads/\" + leadId + \"/notes\", [{ note_type: \"common\", params: { text } }]);\n}\n\nasync function task(leadId, responsibleId, text) {\n  const complete = Math.floor(Date.now() / 1000) + 86400;\n  await req(\"POST\", \"/api/v4/tasks\", [{\n    text,\n    complete_till: complete,\n    entity_id: Number(leadId),\n    entity_type: \"leads\",\n    responsible_user_id: Number(responsibleId || 14811623),\n  }]);\n}\n\nconst logs = [];\nconst today = todayIso(CFG.timezone);\n\nconst listRes = await req(\"GET\", \"/api/v4/leads?limit=250&with=custom_fields_values,tags\");\nif (listRes.statusCode >= 400) {\n  throw new Error(\"Lead list failed: \" + listRes.statusCode + \" \" + JSON.stringify(listRes.body || {}));\n}\n\nconst leads = ((((listRes.body || {})._embedded || {}).leads) || []);\nfor (const lead of leads) {\n  const tags = ((((lead._embedded || {}).tags) || [])).map((t) => String(t.name || \"\").toLowerCase().trim());\n  if (!tags.includes(String(CFG.tag).toLowerCase())) continue;\n  if (Number(lead.pipeline_id) !== Number(CFG.pipelineId)) continue;\n  if (Number(lead.status_id) === Number(CFG.paidStatusId)) continue;\n\n  const documento = fieldVal(lead, CFG.fieldIds.documento);\n  const saldo = Number(fieldVal(lead, CFG.fieldIds.saldo_pendiente) || 0);\n  if (!(saldo > 0)) continue;\n\n  const dueIso = parseDateAny(fieldVal(lead, CFG.fieldIds.fecha_venc_date) || fieldVal(lead, CFG.fieldIds.fecha_venc_text));\n  if (!dueIso) continue;\n  const d = daysBetween(today, dueIso);\n  if (![3, 2, 1].includes(d)) continue;\n\n  const f3 = fieldVal(lead, CFG.fieldIds.aviso_3d);\n  const f2 = fieldVal(lead, CFG.fieldIds.aviso_2d);\n  const f1 = fieldVal(lead, CFG.fieldIds.aviso_1d);\n  if ((d === 3 && f3) || (d === 2 && f2) || (d === 1 && f1)) continue;\n\n  let msg = \"\";\n  if (d === 3) {\n    msg = \"Recordatorio: tu factura \" + documento + \" vence en 3 dias. Por favor realiza tu pago antes de la fecha limite.\";\n  } else if (d === 2) {\n    msg = \"Recordatorio: tu factura \" + documento + \" vence en 2 dias. Tu saldo pendiente es \" + money(saldo) + \".\";\n  } else {\n    msg = \"Aviso final: tu factura \" + documento + \" vence en 1 dia. Tu saldo pendiente es \" + money(saldo) + \".\";\n  }\n\n  const sendRes = await req(\"PATCH\", \"/api/v4/chats/templates\", [{\n    id: CFG.templateId,\n    content: msg,\n    entity_id: Number(lead.id),\n    entity_type: 2,\n  }]);\n\n  let sentOk = sendRes.statusCode < 400;\n  if (!sentOk) {\n    const botRes = await req(\"POST\", \"/api/v2/salesbot/run\", [{\n      bot_id: CFG.salesbotId,\n      entity_id: Number(lead.id),\n      entity_type: 2,\n    }]);\n    if (botRes.statusCode < 400) {\n      const retrySend = await req(\"PATCH\", \"/api/v4/chats/templates\", [{\n        id: CFG.templateId,\n        content: msg,\n        entity_id: Number(lead.id),\n        entity_type: 2,\n      }]);\n      sentOk = retrySend.statusCode < 400;\n    }\n  }\n\n  if (sentOk) {\n    const nowIso = kommoNowIso();\n    const markField =\n      d === 3 ? CFG.fieldIds.aviso_3d :\n      d === 2 ? CFG.fieldIds.aviso_2d :\n      CFG.fieldIds.aviso_1d;\n    await req(\"PATCH\", \"/api/v4/leads\", [{\n      id: Number(lead.id),\n      custom_fields_values: [{ field_id: markField, values: [{ value: nowIso }] }],\n    }]);\n  } else {\n    await note(lead.id, \"No se pudo enviar recordatorio automatico \" + d + \"D. Revisar canal de chat.\");\n    await task(lead.id, lead.responsible_user_id, \"Cobranza manual: no se pudo enviar recordatorio \" + d + \"D\");\n  }\n\n  logs.push({\n    lead_id: Number(lead.id),\n    documento: documento,\n    days_to_due: d,\n    reminder_type: d + \"D\",\n    send_result: sentOk ? \"sent\" : \"failed\",\n    abono_detectado: null,\n    saldo_nuevo: saldo,\n  });\n}\n\nreturn [{ json: { run_at: new Date().toISOString(), count: logs.length, logs } }];\n"
+      }
+    }
+  ],
+  "connections": {
+    "Cron Diario 09:00": {
+      "main": [
+        [
+          {
+            "node": "Reminder Engine (Code)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "America/Mexico_City",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "d830bc22-ca99-4a56-8f6f-b9a6d39b76c5",
+  "activeVersionId": null,
+  "versionCounter": 10,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-03-03T22:19:52.785Z",
+      "createdAt": "2026-03-03T22:19:52.785Z",
+      "role": "workflow:owner",
+      "workflowId": "PRCdA1axuyZ9SMyf",
+      "projectId": "r4oqB6LLZI9aqq9A",
+      "project": {
+        "updatedAt": "2026-02-17T01:18:53.980Z",
+        "createdAt": "2026-02-17T01:16:43.638Z",
+        "id": "r4oqB6LLZI9aqq9A",
+        "name": "Luis Puente <luisfrpuente@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "97ea2654-fe8a-429f-8016-bc837138bdd0",
+        "projectRelations": [
+          {
+            "updatedAt": "2026-02-17T01:16:43.639Z",
+            "createdAt": "2026-02-17T01:16:43.639Z",
+            "userId": "97ea2654-fe8a-429f-8016-bc837138bdd0",
+            "projectId": "r4oqB6LLZI9aqq9A",
+            "user": {
+              "updatedAt": "2026-03-10T23:28:06.000Z",
+              "createdAt": "2026-02-17T01:16:43.320Z",
+              "id": "97ea2654-fe8a-429f-8016-bc837138bdd0",
+              "email": "luisfrpuente@gmail.com",
+              "firstName": "Luis",
+              "lastName": "Puente",
+              "personalizationAnswers": {
+                "version": "v4",
+                "personalization_survey_submitted_at": "2026-02-17T01:19:05.438Z",
+                "personalization_survey_n8n_version": "2.6.3"
+              },
+              "settings": {
+                "userActivated": true,
+                "firstSuccessfulWorkflowId": "TDiINdgzi1YIiIZlwX0zG",
+                "userActivatedAt": 1771294642757,
+                "easyAIWorkflowOnboarded": true,
+                "npsSurvey": {
+                  "waitingForResponse": true,
+                  "ignoredCount": 1,
+                  "lastShownAt": 1773116056152
+                }
+              },
+              "disabled": false,
+              "mfaEnabled": false,
+              "lastActiveAt": "2026-03-10",
+              "isPending": false
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}
