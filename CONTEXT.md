@@ -1,152 +1,189 @@
 # Project Context
 
 ## Purpose
-This project automates collections (`cobranza`) from Excel files in Google Drive into Kommo using n8n.
+This project automates Agroriegos collections from Excel uploads in Google Drive into Kommo through n8n.
 
 Primary goals:
-- Read a specific Excel format from Google Drive.
-- Upsert leads in Kommo by `DOCUMENTO + TELEFONO`.
-- Move leads through the Agroriegos pipeline based on due date and payment state.
-- Listen to chat responses and detect payments/receipts automatically.
+- Read the real Excel workbook format used by the client.
+- Upsert leads and contacts in Kommo by `DOCUMENTO + TELEFONO`.
+- Move leads through the collections pipeline based on due date and payment state.
+- Listen to inbound WhatsApp replies from Kommo and process promises, questions, and payment evidence.
 
-## Current Production Workflow
-- Main ingest workflow: `Kommo Cuentas por Cobrar (Ingesta vía HTTP)`
-- n8n workflow id: `gfJm4JUoiUi7zZgaB2ob0`
-- Google Drive trigger:
-  - folder: `pruebakommo`
-  - folder id: `1QFbTelTwH9M9_Sl-1F17KkiTgv9CqGl2`
-  - event: `fileCreated`
-  - polling: every minute
+## Production Systems
+- n8n base: `https://n8n.srv1388533.hstgr.cloud`
+- Main live workflow name: `Kommo Cuentas por Cobrar (Ingesta via HTTP)`
+- Main live workflow id: `gfJm4JUoiUi7zZgaB2ob0`
+- Google Drive watched folder: `pruebakommo`
+- Google Drive folder id: `1QFbTelTwH9M9_Sl-1F17KkiTgv9CqGl2`
+- Google Drive event: `fileCreated`
+- Google Drive polling: every minute
 
-## Kommo Scope
-- Account: `eduardonolasco18.kommo.com`
-- Pipeline: `Alfredo - Agroriegos`
-- Pipeline id: `13256923`
+## Kommo Account
+- Account: `agroriegosventas.kommo.com`
+- Previous test account: `eduardonolasco18.kommo.com`
+- Current collections pipeline id: `13202899`
+- Collections tag used by n8n: `cobranza_n8n_excel`
 
-Stages:
-- `Leads entrantes`: `102225711`
-- `Entrada inicial`: `102372207`
-- `Recordatorio enviado`: `102225715`
-- `Pagado`: `102225739`
-- `Pago parcial`: `102226103`
-- `Fecha limite`: `102309531`
-- `Atrasado`: `102308999`
+### Current Live Stage IDs
+- `Leads entrantes`: `101806039`
+- `Leads importados`: `102933199`
+- `Recordatorio enviado`: `102812943`
+- `Contacto inicial`: `101806043`
+- `Discusiones`: `101806047`
+- `Toma de decisiones`: `101806051`
+- `Por cobrar`: `101907315`
+- `Pago parcial`: `102931399`
+- `Fecha limite`: `102931403`
+- `Atrasado`: `102931407`
+- `Pagado`: `101907419`
 
-## Kommo Lead Custom Fields
-- `Documento/Factura`: `1858660`
-- `Telefono Cliente`: `1858664`
-- `Fecha Vencimiento (texto)`: `1858666`
-- `Saldo Pendiente`: `1858672`
-- `Pago Realizado`: `1858674`
-- `Razon Social`: `1858676`
-- `Fecha Vencimiento (date)`: `1859896`
-- `Cobranza Aviso 3D Enviado`: `1860878`
-- `Cobranza Aviso 2D Enviado`: `1860880`
-- `Cobranza Aviso 1D Enviado`: `1860882`
-- `Cobranza Ultimo Recibo Hash`: `1860884`
-- `Cobranza Ultimo Abono`: `1860886`
+### Current Live Lead Field IDs
+- `Documento/Factura`: `2382026`
+- `Telefono Cliente`: `2382028`
+- `Fecha Vencimiento (texto)`: `2382030`
+- `Saldo Pendiente`: `2382032`
+- `Pago Realizado`: `2382034`
+- `Razon Social`: `2382036`
+- `Fecha Vencimiento (date)`: `2241884`
+- `Cobranza Aviso 3D Enviado`: `2382038`
+- `Cobranza Aviso 2D Enviado`: `2382040`
+- `Cobranza Aviso 1D Enviado`: `2382042`
+- `Cobranza Ultimo Recibo Hash`: `2382044`
+- `Cobranza Ultimo Abono`: `2382046`
+- Contact phone field id: `2227226`
 
-## Current Business Logic
+## Current Live Workflow Behavior
 
 ### Excel Ingest
-- The workflow reads the uploaded Excel and normalizes only the relevant columns.
-- Leads are matched by:
-  - `DOCUMENTO`
-  - normalized `TELEFONO`
-- If lead exists:
-  - update lead fields
-  - update contact/link if needed
-- If lead does not exist:
-  - create lead
-  - create or reuse contact
-  - link contact to lead
+- n8n reads the uploaded Excel from Drive.
+- The parser still expects the real workbook layout:
+  - sheet `Hoja1`
+  - row 1 blank
+  - row 2 blank
+  - row 3 real headers
+- The workflow normalizes only the business columns it needs and ignores the rest.
 
-### Phone Normalization
-- Current normalization assumes Mexican mobile format for local 10-digit numbers.
-- Rules:
+### Lead Upsert
+- Leads are matched by `DOCUMENTO + TELEFONO`.
+- Phone normalization is still Mexico-specific:
   - `10 digits` -> `521XXXXXXXXXX`
   - `52XXXXXXXXXX` -> `521XXXXXXXXXX`
   - `521XXXXXXXXXX` -> unchanged
-- Result:
-  - lead field stores digits only, e.g. `5219932508575`
-  - contact phone stores `+5219932508575`
+- New leads now enter `Leads importados`.
+- In the current client account, using `Leads entrantes` for create/update was not reliable because Kommo treated that stage differently; `Leads importados` is the working initial stage for uploads.
 
-### Reminders
-- n8n does not send the outbound reminder message directly.
-- n8n moves the lead to the correct stage and marks reminder control fields.
-- Kommo/Salesbot is expected to send the message when the lead enters the reminder stage.
+### Reminder Logic
+- The first reminder should not be sent directly by n8n anymore.
+- n8n should move the lead to `Recordatorio enviado`.
+- Kommo automation/Salesbot sends the first WhatsApp reminder when the lead enters that stage.
+- For the test case used during migration:
+  - `Luis Fernando Ricardez Puente` with due date at `5 days` moved to `Recordatorio enviado`
+  - `Victor Rodolfo Lopez Landa` with due date at `10 days` stayed in `Leads importados`
 
-Reminder timing currently implemented in the main ingest/reminder engine:
-- `5 days before due date` on file upload -> move to `Recordatorio enviado`
-- `due date` and overdue transitions are handled by the reminder logic and stage mapping
+### Inbound Cobranza Webhook
+- Webhook path: `kommo-cobranza`
+- Production URL: `https://n8n.srv1388533.hstgr.cloud/webhook/kommo-cobranza`
+- Kommo inbound message webhooks were validated after enabling the chat webhook in the client account.
+- Confirmed behavior:
+  - inbound WhatsApp messages do reach the workflow
+  - the workflow identifies the correct lead
+  - text, image, and PDF inputs are supported
 
-### Chat / Payment Detection
-- Webhook path in the workflow: `kommo-cobranza`
-- The workflow listens to Kommo chat events for cobranza leads.
-- Payment detection uses OpenAI `gpt-5-nano` for:
-  - text messages
-  - images
-  - PDFs
-- It can:
-  - classify whether the message is a payment/abono
-  - extract amount
-  - update `Pago Realizado`
-  - update `Saldo Pendiente`
-  - write notes/tasks
-  - move to `Pago parcial` or `Pagado`
+### AI Agent and Receipt Processing
+- The cobranza chat path now uses an AI agent with memory:
+  - `AI Agent Cobranza`
+  - `OpenAI Chat Model Cobranza`
+  - `Window Buffer Memory Cobranza`
+  - `Parsear Cobranza Agent (Code)`
+  - `Ruta Cobranza Agent?`
+- Memory key is based on `talk_id`, `chat_id`, or `lead_id`.
+- The agent assumes every inbound message is a reply to the first collections reminder:
+  - `Hola nombre del cliente, le informamos que su pago correspondiente a numero de factura tiene fecha de vencimiento vencimiento del pago.`
+  - `Si ya realizo el pago, por favor ignore este mensaje.`
+  - `Somos AGR.`
+- The agent classifies the message into:
+  - `payment_evidence`
+  - `payment_promise`
+  - `question`
+  - `conversation`
+  - `manual_review`
+- If the message contains payment evidence, the workflow routes it to OCR/payment processing.
+- OCR/payment processing still uses OpenAI and updates:
+  - `Pago Realizado`
+  - `Saldo Pendiente`
+  - status to `Pago parcial` or `Pagado`
+  - notes/tasks when manual review is needed
 
-## Excel Format Requirement
-- The workflow expects the real Excel structure, not an invented workbook.
-- Important facts about the accepted format:
-  - sheet name seen in tests: `Hoja1`
-  - row 1: blank
-  - row 2: blank
-  - row 3: real headers
-  - the original workbook contains many more columns than the logic uses
-- Header row starts at row 3 with columns like:
-  - `VENDEDOR`
-  - `COD VEN`
-  - `COD CLI`
-  - `RAZON SOCIAL`
-  - `TELEFONO1`
-  - `DOCUMENTO`
-  - `FECHA VENC`
-  - `MONTO USD`
-  - `SALDO DOC`
-  - `PAGO`
+## WhatsApp Templates and Salesbot
+- First reminder template already used by Kommo automation:
+  - template id: `11652`
+  - name: `Nueva plantilla de WhatsApp (02.23.2026 5:33PM)`
+- Conversational reply template created in the client account:
+  - template id: `14996`
+  - name: `envio_mensaje`
+- Salesbot created for conversational replies:
+  - salesbot id: `25756`
+  - name: `mensaje automatico`
 
-Only some columns are used by the logic, but the file should still keep the original workbook layout.
+## What Was Validated During Migration
+- Account migration moved the project from the old Kommo test tenant to `agroriegosventas`.
+- The live workflow was updated in n8n to use the client tenant and the new live IDs.
+- A test workbook was created from the real Excel format with only two leads:
+  - `Luis Fernando Ricardez Puente` / `9932508575`
+  - `Victor Rodolfo Lopez Landa` / `9171176637`
+- The Drive trigger was tested with real uploads.
+- Stage movement worked as expected for the `5 days` reminder scenario.
+- The inbound WhatsApp webhook was validated with a real reply such as `Hola si en un momento se lo mando`.
+- The AI agent correctly interpreted that message as a payment promise and produced a reply candidate.
 
-### Preferred Template for Tests
-Use this file as the physical template when creating new test uploads:
-- `C:\Users\luis_\Downloads\prueba5dias (1).xlsx`
+## Current Blocker
+- n8n can now:
+  - ingest the Excel
+  - create/update leads in the client account
+  - move reminder leads to the correct stage
+  - receive inbound WhatsApp replies
+  - understand the conversation with memory
+  - process payment evidence
+- The current blocker is outbound conversational replies from n8n after the customer answers.
 
-Do not rebuild the workbook from scratch unless the parser is updated too.
+### Current Failure
+- The live reply path currently tries:
+  1. update chat template `14996` via `PATCH /api/v4/chats/templates`
+  2. trigger salesbot `25756` via `POST /api/v2/salesbot/run`
+- Real executions showed:
+  - the agent generates a valid reply text
+  - `GET /api/v4/chats/templates` lists template `14996`
+  - but `PATCH /api/v4/chats/templates` returns `400 EntityNotFound` for that same template id
+- This means the template exists, but the public request being used by the workflow is not accepted for updating it in this account.
+
+### Recommended Next Fix
+- Do not rely on `PATCH /api/v4/chats/templates` for conversational replies.
+- Safer replacement:
+  - n8n writes the agent reply text into a dedicated custom field on the lead
+  - the Kommo salesbot sends that field value
+- That keeps Kommo in charge of delivery and avoids the failing template update call.
+
+## Test Files
+- Real input template used for reference: `C:\Users\luis_\Downloads\prueba5dias (1).xlsx`
+- Generated two-lead test workbook used during migration: `C:\Users\luis_\Downloads\prueba5dias_dos_leads.xlsx`
+
+## Operational Notes
+- Local files such as `.backup_*.json`, `.live_*.json`, `.workflow_after_*.json`, and `.codex_*` may contain live tokens or workflow snapshots and must not be committed or shared.
+- The local exported workflow JSON files in the repo are not the full source of truth for the latest live workflow anymore. Before redeploying from the repo, refresh the export from n8n and sanitize secrets.
+- If this repository is shared outside the team, rotate exposed credentials first.
 
 ## Files That Matter Most
-- [Documento_Diseno_n8n.md](C:\Users\luis_\Desktop\newkommoproject\Documento_Diseno_n8n.md)
-- [deploy_cobranza_plan.py](C:\Users\luis_\Desktop\newkommoproject\deploy_cobranza_plan.py)
-- [deploy_cobranza_summary.json](C:\Users\luis_\Desktop\newkommoproject\deploy_cobranza_summary.json)
-- [workflow_n8n_kommo_actualizado.json](C:\Users\luis_\Desktop\newkommoproject\workflow_n8n_kommo_actualizado.json)
-- [workflow_cobranza_recordatorios.json](C:\Users\luis_\Desktop\newkommoproject\workflow_cobranza_recordatorios.json)
-- [workflow_kommo_chat_cobranza.json](C:\Users\luis_\Desktop\newkommoproject\workflow_kommo_chat_cobranza.json)
-- [diagrama_arquitectura.png](C:\Users\luis_\Desktop\newkommoproject\diagrama_arquitectura.png)
-- [diagrama_vencimiento.png](C:\Users\luis_\Desktop\newkommoproject\diagrama_vencimiento.png)
-- [diagrama_pagos.png](C:\Users\luis_\Desktop\newkommoproject\diagrama_pagos.png)
+- `CONTEXT.md`
+- `deploy_cobranza_plan.py`
+- `run_e2e_tests.py`
+- `workflow_n8n_kommo_actualizado.json`
+- `workflow_cobranza_recordatorios.json`
 
-## Known Operational Notes
-- The project contains exported workflows and design artifacts; local files are used as source-of-truth snapshots.
-- Some JSON workflow exports contain embedded secrets/tokens from prior testing. Do not reuse or share them blindly.
-- If this project is shared externally, rotate exposed credentials first.
-
-## Recommended AI Reading Order
-1. `CONTEXT.md`
-2. `deploy_cobranza_summary.json`
-3. `Documento_Diseno_n8n.md`
-4. `workflow_n8n_kommo_actualizado.json`
-
-## Last Validated State
-- Main ingest workflow was redeployed with MX phone normalization.
-- Confirmed test result after redeploy:
-  - `LUIS FERNANDO RICARDEZ PUENTE` with local phone `9932508575` becomes `5219932508575`
-  - `VICTOR RODOLFO` with local phone `9171176637` becomes `5219171176637`
+## Last Verified State
+- `March 15, 2026` to `March 16, 2026`
+- Live workflow id `gfJm4JUoiUi7zZgaB2ob0` active in n8n
+- Drive ingest working
+- Reminder stage movement working for the two-lead test
+- Inbound WhatsApp webhook working
+- AI agent with chat memory working
+- Outbound conversational reply still blocked by Kommo template update behavior

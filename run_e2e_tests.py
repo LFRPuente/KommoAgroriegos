@@ -21,7 +21,7 @@ N8N_API_BASE = os.environ.get("N8N_API_BASE", "https://n8n.srv1388533.hstgr.clou
 N8N_WEBHOOK_BASE = os.environ.get("N8N_WEBHOOK_BASE", "https://n8n.srv1388533.hstgr.cloud/webhook/")
 N8N_API_KEY = require_env("N8N_API_KEY")
 
-KOMMO_BASE = os.environ.get("KOMMO_BASE", "https://eduardonolasco18.kommo.com")
+KOMMO_BASE = os.environ.get("KOMMO_BASE", "https://agroriegosventas.kommo.com")
 KOMMO_TOKEN = require_env("KOMMO_TOKEN")
 
 INGEST_WORKFLOW_ID = "gfJm4JUoiUi7zZgaB2ob0"

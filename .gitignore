@@ -3,6 +3,12 @@ __pycache__/
 __n8n_nodes_base_tmp/
 __tmp*/
 
+.backup_*.json
+.live_*.json
+.workflow_after_*.json
+.codex_*
+.detectar_cobranza_lead.js
+
 .env
 .env.*
 !.env.example
