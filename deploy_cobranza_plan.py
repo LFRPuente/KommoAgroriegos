@@ -156,6 +156,7 @@ def get_or_create_control_fields():
         "aviso_1d": by_name["cobranza aviso 1d enviado"]["id"],
         "ultimo_hash": by_name["cobranza ultimo recibo hash"]["id"],
         "ultimo_abono": by_name["cobranza ultimo abono"]["id"],
+        "status_pago": (by_name.get("status pago") or {}).get("id"),
     }
     return field_ids
 
@@ -212,12 +213,15 @@ def get_pipeline_stage_ids(pipeline_id):
 
     stage_ids = {
         "leads_entrantes": find_contains("leads entrantes") or first_status_id,
+        "leads_importados": find_contains("leads importados") or find_contains("importados"),
         "entrada_inicial": find_contains("entrada inicial"),
         "recordatorio_enviado": find_contains("recordatorio 1") or find_contains("recordatorio enviado") or find_contains("recordatorio"),
         "pagado": find_contains("pagado") or DEFAULT_PAID_STATUS_ID,
         "pago_parcial": find_contains("pago parcial") or find_contains("cotizacion enviada"),
         "fecha_limite": find_contains("fecha limite") or find_contains("sin respuesta"),
         "atrasado": find_contains("atrasado") or find_contains("sin respuesta"),
+        "revisar_pago": find_contains("revisar pago"),
+        "revision_urgente": find_contains("revision urgente"),
     }
 
     missing = [k for k in ("leads_entrantes", "pagado", "pago_parcial", "fecha_limite", "atrasado") if not stage_ids.get(k)]
@@ -876,7 +880,8 @@ async function analyzeWithOpenAI(row) {
     "Responde SOLO JSON valido con esta forma exacta:",
     '{"es_pago":true|false,"es_recibo":true|false,"tipo":"abono|pago_total|no_pago|desconocido","monto":number|null,"moneda":"MXN|USD|UNKNOWN","referencia":"texto corto","confidence":number,"requiere_revision_manual":true|false,"motivo":"texto corto"}',
     "Reglas:",
-    "- Marca es_pago=true solo si hay intencion clara de pago o abono.",
+    "- Marca es_pago=true si hay intencion clara de pago o abono.",
+    "- Si hay un comprobante o recibo legible con monto, marca es_recibo=true y es_pago=true.",
     "- Si el cliente solo promete pagar o pregunta algo, es_pago=false.",
     "- Si no hay monto claro, monto=null y requiere_revision_manual=true.",
     "- confidence debe ser un numero entre 0 y 1.",
@@ -989,7 +994,10 @@ try {
 
 const confidence = Number(toNumberFlexible((analysis || {}).confidence) || 0);
 const isPayment = Boolean((analysis || {}).es_pago);
+const isReceipt = Boolean((analysis || {}).es_recibo);
+const paymentType = String((analysis || {}).tipo || "").trim().toLowerCase();
 const requiresManual = Boolean((analysis || {}).requiere_revision_manual);
+const saldoActual = Number(row.cobranza_saldo_actual || 0);
 const textAmount = extractAmountFromMessage(row.message_text || "");
 const textSuggestsPayment = /(abon|pago|pagu|deposit|transfer|liquid|comprobante|recibo)/i.test(String(row.message_text || ""));
 const explicitTextAmount = textSuggestsPayment && Number.isFinite(textAmount) && textAmount > 0;
@@ -998,8 +1006,11 @@ if (explicitTextAmount) {
   source = source ? source + "+message_text" : "message_text_support";
 }
 const minConfidence = 0.6;
-const effectiveIsPayment = isPayment || explicitTextAmount;
-const canTrustExplicitText = explicitTextAmount && Number.isFinite(amount) && amount > 0;
+const receiptLikePayment = isReceipt || paymentType === "abono" || paymentType === "pago_total";
+const exceedsSaldo = Number.isFinite(amount) && amount > 0 && saldoActual > 0 && amount > (saldoActual + 0.01);
+const effectiveIsPayment = isPayment || receiptLikePayment || explicitTextAmount;
+const canTrustExplicitText = explicitTextAmount && Number.isFinite(amount) && amount > 0 && !exceedsSaldo;
+const canAutoApplyReceipt = receiptLikePayment && Number.isFinite(amount) && amount > 0 && !exceedsSaldo;
 
 if (!effectiveIsPayment) {
   return {
@@ -1012,7 +1023,30 @@ if (!effectiveIsPayment) {
   };
 }
 
-if (!(Number.isFinite(amount) && amount > 0) || (!canTrustExplicitText && confidence < minConfidence) || (requiresManual && !canTrustExplicitText)) {
+if (exceedsSaldo) {
+  await createNote(
+    leadId,
+    "Comprobante con monto mayor al saldo pendiente. monto=" +
+      String(amount) +
+      " | saldo_actual=" +
+      String(saldoActual) +
+      " | AI=" +
+      compact(rawAiText || analysis, 900) +
+      " | URL: " +
+      String(row.media_url || "")
+  );
+  await createTask(leadId, 14811623, "Validar pago manualmente (monto mayor al saldo) en lead " + leadId);
+  return {
+    json: {
+      ...row,
+      cobranza_reply: "Recibimos tu comprobante, pero el monto detectado supera el saldo pendiente. Un asesor lo revisara.",
+      cobranza_detected_amount: null,
+      cobranza_ai_result: analysis,
+    },
+  };
+}
+
+if (!(Number.isFinite(amount) && amount > 0) || (!canAutoApplyReceipt && !canTrustExplicitText && confidence < minConfidence) || (requiresManual && !canAutoApplyReceipt && !canTrustExplicitText)) {
   await createNote(
     leadId,
     "Evidencia de pago requiere revision manual. confidence=" +
@@ -1033,11 +1067,10 @@ if (!(Number.isFinite(amount) && amount > 0) || (!canTrustExplicitText && confid
   };
 }
 
-const saldoActual = Number(row.cobranza_saldo_actual || 0);
 const pagoActual = Number(row.cobranza_pago_actual || 0);
 const pagoNuevo = Math.max(0, pagoActual + amount);
 const saldoNuevo = Math.max(0, saldoActual - amount);
-const partialStatusId = Number(CFG.partialStatusId || 0);
+const reviewStatusId = Number(CFG.partialStatusId || 0);
 
 const customFields = [
   { field_id: CFG.fieldIds.pago_realizado, values: [{ value: Number(pagoNuevo.toFixed(2)) }] },
@@ -1047,10 +1080,10 @@ const customFields = [
 ];
 
 const patchLead = [{ id: leadId, custom_fields_values: customFields }];
-if (saldoNuevo <= 0) {
+if (reviewStatusId > 0) {
+  patchLead[0].status_id = reviewStatusId;
+} else if (saldoNuevo <= 0) {
   patchLead[0].status_id = CFG.paidStatusId;
-} else if (partialStatusId > 0) {
-  patchLead[0].status_id = partialStatusId;
 }
 
 const patchRes = await request("PATCH", "/api/v4/leads", patchLead);
@@ -1078,12 +1111,12 @@ await createNote(
 
 const msg =
   saldoNuevo <= 0
-    ? "Gracias. Tu pago fue registrado y tu saldo quedo en 0. Factura liquidada."
+    ? "Gracias. Recibimos tu comprobante y registramos tu pago. Quedo en revision."
     : "Gracias. Registramos tu abono de $" +
       Number(amount.toFixed(2)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
       ". Tu saldo pendiente es $" +
       Number(saldoNuevo.toFixed(2)).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-      ".";
+      ". El pago quedo en revision.";
 
 return {
   json: {
@@ -1199,6 +1232,11 @@ def build_reminder_engine_code(field_ids, stage_ids, pipeline_id):
         "tag": TAG_NAME,
         "timezone": "America/Mexico_City",
         "fieldIds": field_ids,
+        "statusPagoEnums": {
+            "pagado": 134193626,
+            "abonado": 134193628,
+            "no_pagado": 134193630,
+        },
     }
     return (
         "const CFG = "
@@ -1211,6 +1249,31 @@ function fieldVal(lead, fieldId) {
   if (!hit || !Array.isArray(hit.values) || hit.values.length === 0) return "";
   const v = hit.values[0].value;
   return v === null || v === undefined ? "" : String(v);
+}
+
+function fieldEnumId(lead, fieldId) {
+  const arr = Array.isArray(lead.custom_fields_values) ? lead.custom_fields_values : [];
+  const hit = arr.find((x) => Number(x.field_id) === Number(fieldId));
+  if (!hit || !Array.isArray(hit.values) || hit.values.length === 0) return 0;
+  return Number(hit.values[0].enum_id || 0);
+}
+
+function normalizePhone(v) {
+  const digits = String(v || "").replace(/[^0-9]/g, "");
+  if (!digits) return "";
+  if (digits.length === 10) return "521" + digits;
+  if (digits.length === 12 && digits.startsWith("52")) return "521" + digits.slice(2);
+  if (digits.length === 13 && digits.startsWith("521")) return digits;
+  return digits;
+}
+
+function normalizeText(v) {
+  return String(v || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function parseDateAny(v) {
@@ -1296,10 +1359,14 @@ async function task(leadId, responsibleId, text) {
 
 const logs = [];
 const today = todayIso(CFG.timezone);
-const partialStatusId = Number((CFG.statusIds || {}).pago_parcial || 0);
 const deadlineStatusId = Number((CFG.statusIds || {}).fecha_limite || 0);
 const overdueStatusId = Number((CFG.statusIds || {}).atrasado || 0);
+const urgentStatusId = Number((CFG.statusIds || {}).revision_urgente || 0);
 const reminderSentStatusId = Number((CFG.statusIds || {}).recordatorio_enviado || 0);
+const reviewStatusId = Number((CFG.statusIds || {}).revisar_pago || 0);
+const leadsImportadosStatusId = Number((CFG.statusIds || {}).leads_importados || 0);
+const baseStatusId = Number((CFG.statusIds || {}).entrada_inicial || leadsImportadosStatusId || 0);
+const statusPagoFieldId = Number((CFG.fieldIds || {}).status_pago || 0);
 const inputRows = $input.all().map((x) => x.json || {});
 const uploadDocs = new Set(
   inputRows
@@ -1335,16 +1402,43 @@ for (let page = 1; page <= 100; page += 1) {
   const hasNext = Boolean((((listRes.body || {})._links || {}).next || {}).href);
   if (!hasNext) break;
 }
+
+function readStatusPago(lead) {
+  if (!(statusPagoFieldId > 0)) return "";
+  const enumId = fieldEnumId(lead, statusPagoFieldId);
+  if (enumId && enumId === Number((CFG.statusPagoEnums || {}).pagado || 0)) return "pagado";
+  if (enumId && enumId === Number((CFG.statusPagoEnums || {}).abonado || 0)) return "abonado";
+  if (enumId && enumId === Number((CFG.statusPagoEnums || {}).no_pagado || 0)) return "no_pagado";
+  const raw = normalizeText(fieldVal(lead, statusPagoFieldId));
+  if (!raw) return "";
+  if (raw.includes("no pagado")) return "no_pagado";
+  if (raw.includes("abonado")) return "abonado";
+  if (raw.includes("pagado")) return "pagado";
+  return "";
+}
+
+const canonicalLeads = new Map();
 for (const lead of leads) {
   const tags = ((((lead._embedded || {}).tags) || [])).map((t) => String(t.name || "").toLowerCase().trim());
   if (!tags.includes(String(CFG.tag).toLowerCase())) continue;
   if (Number(lead.pipeline_id) !== Number(CFG.pipelineId)) continue;
   if (Number(lead.status_id) === Number(CFG.paidStatusId)) continue;
 
+  const keyDocumento = String(fieldVal(lead, CFG.fieldIds.documento) || "").trim();
+  const keyTelefono = normalizePhone(fieldVal(lead, CFG.fieldIds.telefono));
+  const dedupeKey = keyDocumento && keyTelefono ? keyDocumento + "|" + keyTelefono : "lead:" + String(lead.id || "");
+  const prev = canonicalLeads.get(dedupeKey);
+  const rank = Number(lead.updated_at || lead.created_at || lead.id || 0);
+  const prevRank = prev ? Number(prev.updated_at || prev.created_at || prev.id || 0) : -1;
+  if (!prev || rank >= prevRank) {
+    canonicalLeads.set(dedupeKey, lead);
+  }
+}
+
+for (const lead of canonicalLeads.values()) {
   const documento = fieldVal(lead, CFG.fieldIds.documento);
   if (uploadMode && !uploadDocs.has(String(documento || "").trim())) continue;
   const saldo = Number(fieldVal(lead, CFG.fieldIds.saldo_pendiente) || 0);
-  const pagoRealizado = Number(fieldVal(lead, CFG.fieldIds.pago_realizado) || 0);
   if (!(saldo > 0)) continue;
 
   const dueIso = parseDateAny(fieldVal(lead, CFG.fieldIds.fecha_venc_date) || fieldVal(lead, CFG.fieldIds.fecha_venc_text));
@@ -1354,38 +1448,70 @@ for (const lead of leads) {
   const firstSent = fieldVal(lead, CFG.fieldIds.aviso_3d);
   const dueSent = fieldVal(lead, CFG.fieldIds.aviso_2d);
   const finalSent = fieldVal(lead, CFG.fieldIds.aviso_1d);
+  const currentStatusId = Number(lead.status_id || 0);
+  const isInBaseStage = Number(baseStatusId) > 0 && currentStatusId === Number(baseStatusId);
+  const isInReviewStatus = Number(reviewStatusId) > 0 && currentStatusId === Number(reviewStatusId);
+  const statusPagoDecision = !uploadMode && isInReviewStatus ? readStatusPago(lead) : "";
 
   let reminderType = "";
-  let stageTarget = Number(lead.status_id || 0);
+  let stageTarget = currentStatusId;
   let reminderFieldId = 0;
 
-  if (d === 5 && !firstSent) {
+  if (statusPagoDecision === "pagado") {
+    reminderType = "REVIEW_PAID";
+    stageTarget = Number(CFG.paidStatusId || currentStatusId);
+  } else if (statusPagoDecision === "abonado" || statusPagoDecision === "no_pagado") {
+    if (d > 5) {
+      reminderType = "REVIEW_REENTRY_BASE";
+      stageTarget = baseStatusId > 0 ? baseStatusId : currentStatusId;
+    } else if (d === 5) {
+      reminderType = "REVIEW_REENTRY_5D";
+      stageTarget = reminderSentStatusId > 0 ? reminderSentStatusId : currentStatusId;
+      reminderFieldId = firstSent ? 0 : Number(CFG.fieldIds.aviso_3d || 0);
+    } else if (d > 0) {
+      reminderType = "REVIEW_REENTRY_BASE";
+      stageTarget = baseStatusId > 0 ? baseStatusId : currentStatusId;
+    } else if (d >= -4) {
+      reminderType = "REVIEW_REENTRY_DEADLINE";
+      stageTarget = deadlineStatusId > 0 ? deadlineStatusId : currentStatusId;
+      reminderFieldId = d === 0 && !dueSent ? Number(CFG.fieldIds.aviso_2d || 0) : 0;
+    } else if (d === -5) {
+      reminderType = "REVIEW_REENTRY_LATE_5D";
+      stageTarget = overdueStatusId > 0 ? overdueStatusId : currentStatusId;
+      reminderFieldId = finalSent ? 0 : Number(CFG.fieldIds.aviso_1d || 0);
+    } else if (d <= -6) {
+      reminderType = "REVIEW_REENTRY_URGENT";
+      stageTarget = urgentStatusId > 0 ? urgentStatusId : currentStatusId;
+    } else {
+      continue;
+    }
+  } else if (isInReviewStatus) {
+    continue;
+  } else if (d === 5 && (!firstSent || isInBaseStage)) {
     reminderType = "5D";
-    stageTarget = reminderSentStatusId > 0 ? reminderSentStatusId : Number(lead.status_id || 0);
-    reminderFieldId = Number(CFG.fieldIds.aviso_3d || 0);
-  } else if (!uploadMode && d === 0 && !dueSent) {
+    stageTarget = reminderSentStatusId > 0 ? reminderSentStatusId : currentStatusId;
+    reminderFieldId = firstSent ? 0 : Number(CFG.fieldIds.aviso_3d || 0);
+  } else if (!uploadMode && d <= 0 && d > -5 && (!dueSent || isInBaseStage)) {
     reminderType = "DUE";
-    if (pagoRealizado > 0 && partialStatusId > 0) {
-      stageTarget = partialStatusId;
-    } else if (deadlineStatusId > 0) {
+    if (deadlineStatusId > 0) {
       stageTarget = deadlineStatusId;
     }
-    reminderFieldId = Number(CFG.fieldIds.aviso_2d || 0);
-  } else if (!uploadMode && d <= -5 && !finalSent) {
+    reminderFieldId = d === 0 && !dueSent ? Number(CFG.fieldIds.aviso_2d || 0) : 0;
+  } else if (!uploadMode && d === -5 && (!finalSent || isInBaseStage)) {
     reminderType = "LATE_5D";
     if (overdueStatusId > 0) {
       stageTarget = overdueStatusId;
     }
-    reminderFieldId = Number(CFG.fieldIds.aviso_1d || 0);
-  } else if (!uploadMode && d < 0 && overdueStatusId > 0 && Number(lead.status_id) !== overdueStatusId) {
-    await moveStatus(lead.id, overdueStatusId);
-    continue;
+    reminderFieldId = finalSent ? 0 : Number(CFG.fieldIds.aviso_1d || 0);
+  } else if (!uploadMode && d <= -6 && urgentStatusId > 0 && currentStatusId !== urgentStatusId) {
+    reminderType = "URGENT";
+    stageTarget = urgentStatusId;
   } else {
     continue;
   }
 
   const moveRes =
-    Number(stageTarget) > 0 && Number(stageTarget) !== Number(lead.status_id || 0)
+    Number(stageTarget) > 0 && Number(stageTarget) !== currentStatusId
       ? await moveStatus(lead.id, stageTarget)
       : { ok: true, skipped: true, statusCode: 0 };
   const markRes = reminderFieldId > 0 ? await markReminder(lead.id, reminderFieldId) : { ok: true, statusCode: 0 };
