@@ -9,9 +9,9 @@ __tmp*/
 .codex_*
 .detectar_cobranza_lead.js
 
-.env
-.env.*
-!.env.example
+# .env
+# .env.*
+# !.env.example
 
 *.xlsx
 *.csv
