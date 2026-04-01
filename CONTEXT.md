@@ -50,8 +50,11 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 |-------|-----|
 | Leads entrantes | `103388963` |
 | Leads importados | `103388967` |
-| recordatorio 5 dias antes | `103388971` |
+| recordatorio 5 dias | `103388971` |
+| abono | `103610175` |
+| No pagado | `103611443` |
 | deadline | `103388975` |
+| deadline - abono | `103610171` |
 | 5 dias atrasado | `103388979` |
 | revision urgente | `103429431` |
 | revisar pago | `103429435` |
@@ -76,6 +79,7 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 | Aviso 3d | `3282254` | text |
 | Aviso 2d | `3282256` | text |
 | Aviso 1d | `3282258` | text |
+| Fecha Abono | `3293960` | date |
 
 **IMPORTANT type quirks in `agroriegoscorp`:**
 - `Saldo Pendiente` and `Pago Realizado` are type **text**, so values MUST be sent as `String(value)`, not as raw numbers. Sending a Number will cause `400 InvalidType`.
@@ -106,6 +110,10 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
   - Uses field `Respuesta IA` (ID `3281424`)
   - Salesbot config must reference `{{lead.cf.3281424}}` (NOT the old `2383804`)
   - Previous salesbot IDs from old accounts: `31998` (agroriegosventas), `25756` (eduardonolasco18)
+- Salesbot for `deadline - abono` stage: **ID `39734`**
+  - Template: `Cobranza con Abono` (WABA ID `891921103630372`)
+  - Triggered automatically by Kommo automation when lead enters `deadline - abono`
+  - Variables: `{{contact.name}}`, `{{lead.cf.3272952}}`, `{{lead.price}}`, `{{lead.cf.3281422}}`, `{{lead.cf.3293960}}`, `{{lead.cf.3272956}}`
 
 ## Current Live Workflow Behavior
 
@@ -130,7 +138,7 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 - The first reminder is NOT sent directly by n8n.
 - n8n moves the lead to `recordatorio 5 dias antes` and Kommo Salesbot sends the WhatsApp template.
 - Current live reminder engine behavior:
-  - `d == 5` -> `recordatorio 5 dias antes`
+  - `d == 5` -> `recordatorio 5 dias`
   - `d == 0` -> `deadline`
   - `d == -5` -> `5 dias atrasado`
   - `d <= -6` -> `revision urgente`
@@ -138,7 +146,15 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 - The live reminder engine reads `Status pago` when a lead is in `revisar pago`:
   - empty -> stays in `revisar pago`
   - `Pagado` -> moves to `pagado`
-  - `Abonado` or `No Pagado` -> on next daily cycle, recolocated by due date
+  - `Abonado` -> moves to `abono`
+  - `No Pagado` -> moves to `No pagado`
+- Leads in `abono`:
+  - `d == 0` -> `deadline - abono` (salesbot `39734` sends WhatsApp template)
+  - `d <= -5` -> `5 dias atrasado`
+- Leads in `No pagado`:
+  - `d == 0` -> `deadline`
+  - `d <= -5` -> `5 dias atrasado`
+- Recordatorio de 5 días antes NO aplica para leads en `abono` o `No pagado`
 
 ### Inbound Cobranza Webhook
 - Webhook path: `kommo-cobranza`
@@ -218,6 +234,7 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 - Verify salesbot `38308` actually delivers WhatsApp messages after fixing `{{lead.cf.3281424}}`.
 - When a lead reviewed as `Abonado` or `No Pagado` sends another receipt, clear `Status pago` in the OCR/payment patch.
 - Consider if `failed_no_outgoing_chat` is still an issue after salesbot field fix, or if it was purely caused by the wrong field ID.
+- Populate `Fecha Abono` (`3293960`) in `Cobranza OCR + Abono` node when processing a payment receipt.
 
 ## Instruction For Next Agent
 - Before applying any new workflow or code change, ask the user first: `¿Ya hago los cambios?`
@@ -233,13 +250,25 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 - `workflow_n8n_kommo_actualizado.json` (stale local copy)
 - `workflow_cobranza_recordatorios.json` (stale local copy)
 
+## n8n Workflow IDs (updated)
+
+| Workflow | ID | Purpose |
+|----------|-----|---------|
+| Kommo Cuentas por Cobrar (Ingesta vía HTTP) | `gfJm4JUoiUi7zZgaB2ob0` | Excel ingest, lead upsert, inbound chat/receipt processing |
+| Kommo Cobranzas - Recordatorios Diario | `PRCdA1axuyZ9SMyf` | Daily cron for reminder stage movements |
+| kommon8ndemo | `TDiINdgzi1YIiIZlwX0zG` | Inbound WhatsApp chat webhook |
+| Codex Drive Upload Debug | `Xh4aTDrKmenx7DZ3` | Test helper for uploading Excel via API |
+| Kommo Cobranzas - Reporte Excel Diario | `HW1MLmCmpwP6BmYl` | Daily cron generates cobros Excel and uploads to Drive |
+
 ## Last Verified State
-- **Date:** March 25, 2026
+- **Date:** March 30, 2026
 - **Account:** `agroriegoscorp.kommo.com`
 - Live workflow `gfJm4JUoiUi7zZgaB2ob0` active in n8n
 - Drive ingest: ✅ working
 - Lead creation/update: ✅ working (type quirks resolved)
-- Reminder stage movement: ✅ working
+- Reminder stage movement: ✅ working (updated with new abono/no_pagado stages)
 - Inbound WhatsApp webhook: ✅ working
 - AI agent + OCR payment processing: ✅ working
 - Outbound reply via salesbot: ⚠️ salesbot runs but field reference needs manual fix in Kommo UI (`{{lead.cf.3281424}}`)
+- Reporte Excel cobros diario: ✅ workflow `HW1MLmCmpwP6BmYl` activo, corre a las 08:00, sube `cobros_YYYY-MM-DD.xlsx` a Drive
+- Salesbot `39734` configurado para `deadline - abono`: ✅ trigger por etapa configurado en Kommo UI
