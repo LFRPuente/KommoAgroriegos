@@ -1,0 +1,92 @@
+﻿[
+    {
+        "name":  "Google Drive Trigger",
+        "type":  "n8n-nodes-base.googleDriveTrigger",
+        "id":  "22df3df8-5615-449c-814c-9fd147ce102e"
+    },
+    {
+        "name":  "Descargar Excel",
+        "type":  "n8n-nodes-base.googleDrive",
+        "id":  "e9bedc5e-50a0-4711-9b23-6caabe02d4e6"
+    },
+    {
+        "name":  "Leer Excel",
+        "type":  "n8n-nodes-base.spreadsheetFile",
+        "id":  "0eeef03c-bb63-47ac-801d-ac1ee59139e5"
+    },
+    {
+        "name":  "Limpiar Datos",
+        "type":  "n8n-nodes-base.code",
+        "id":  "981059fe-ea42-4ae2-969b-df9802c36ed2"
+    },
+    {
+        "name":  "Upsert Lead+Contacto (Code)",
+        "type":  "n8n-nodes-base.code",
+        "id":  "59319b11-ccb2-4120-8917-f6d2e9a38380"
+    },
+    {
+        "name":  "Cron Cobranza 09:00",
+        "type":  "n8n-nodes-base.cron",
+        "id":  "9a28d0f2-0adf-45e3-bf35-eb647482d423"
+    },
+    {
+        "name":  "Reminder Engine (Code)",
+        "type":  "n8n-nodes-base.code",
+        "id":  "6eec061b-d206-4e17-a22e-ef9e0e82c8e1"
+    },
+    {
+        "name":  "Webhook Cobranza",
+        "type":  "n8n-nodes-base.webhook",
+        "id":  "2d775cb2-41e1-4ca6-9044-fee602f4ac20"
+    },
+    {
+        "name":  "Parsear Chat Cobranza (Code)",
+        "type":  "n8n-nodes-base.code",
+        "id":  "d2e6320a-64a3-4b3d-9ec4-dc0a2a821a25"
+    },
+    {
+        "name":  "Detectar Cobranza Lead",
+        "type":  "n8n-nodes-base.code",
+        "id":  "0c54b501-cac3-485e-9fd1-9b5f04609f80"
+    },
+    {
+        "name":  "Ruta Cobranza Recibo?",
+        "type":  "n8n-nodes-base.if",
+        "id":  "0752f0a8-2b82-456a-b9f5-3a7b3400e5e3"
+    },
+    {
+        "name":  "Cobranza OCR + Abono",
+        "type":  "n8n-nodes-base.code",
+        "id":  "2128f249-5247-485e-9883-fdac3f4e10ba"
+    },
+    {
+        "name":  "Enviar Mensaje Cobranza (Code)",
+        "type":  "n8n-nodes-base.code",
+        "id":  "ccfa52c3-533a-49b6-ae23-1813f55a41e0"
+    },
+    {
+        "name":  "AI Agent Cobranza",
+        "type":  "@n8n/n8n-nodes-langchain.agent",
+        "id":  "agent-cobranza-001"
+    },
+    {
+        "name":  "OpenAI Chat Model Cobranza",
+        "type":  "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+        "id":  "openai-cobranza-model-001"
+    },
+    {
+        "name":  "Window Buffer Memory Cobranza",
+        "type":  "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+        "id":  "memory-cobranza-001"
+    },
+    {
+        "name":  "Parsear Cobranza Agent (Code)",
+        "type":  "n8n-nodes-base.code",
+        "id":  "parsear-cobranza-agent-001"
+    },
+    {
+        "name":  "Ruta Cobranza Agent?",
+        "type":  "n8n-nodes-base.if",
+        "id":  "ruta-cobranza-agent-001"
+    }
+]

@@ -1,0 +1,801 @@
+﻿{
+    "id":  "24584",
+    "finished":  false,
+    "mode":  "manual",
+    "retryOf":  null,
+    "retrySuccessId":  null,
+    "status":  "error",
+    "createdAt":  "2026-04-08T19:19:30.892Z",
+    "startedAt":  "2026-04-08T19:19:30.895Z",
+    "stoppedAt":  "2026-04-08T19:19:31.685Z",
+    "deletedAt":  null,
+    "workflowId":  "HW1MLmCmpwP6BmYl",
+    "waitTill":  null,
+    "storedAt":  "db",
+    "data":  {
+                 "version":  1,
+                 "startData":  {
+
+                               },
+                 "resultData":  {
+                                    "error":  {
+                                                  "level":  "error",
+                                                  "tags":  {
+
+                                                           },
+                                                  "description":  "TypeError",
+                                                  "lineNumber":  3,
+                                                  "message":  "this.getWorkflowStaticData is not a function [line 3]",
+                                                  "stack":  "TypeError: this.getWorkflowStaticData is not a function\n    at VmCodeWrapper (evalmachine.\u003canonymous\u003e:3:25)\n    at evalmachine.\u003canonymous\u003e:50:2\n    at Script.runInContext (node:vm:149:12)\n    at runInContext (node:vm:301:6)\n    at result (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_eb51b38615a039445701c88b088f88d0/node_modules/@n8n/task-runner/dist/js-task-runner/js-task-runner.js:185:61)\n    at new Promise (\u003canonymous\u003e)\n    at JsTaskRunner.runForAllItems (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_eb51b38615a039445701c88b088f88d0/node_modules/@n8n/task-runner/dist/js-task-runner/js-task-runner.js:178:34)\n    at JsTaskRunner.executeTask (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_eb51b38615a039445701c88b088f88d0/node_modules/@n8n/task-runner/dist/js-task-runner/js-task-runner.js:128:26)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.waitingForSettings (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_eb51b38615a039445701c88b088f88d0/node_modules/@n8n/task-runner/dist/task-runner.js:256:17)"
+                                              },
+                                    "runData":  {
+                                                    "Cron Diario Cobros 08:00":  [
+                                                                                     {
+                                                                                         "startTime":  1775675970902,
+                                                                                         "executionIndex":  0,
+                                                                                         "source":  [
+
+                                                                                                    ],
+                                                                                         "hints":  [
+
+                                                                                                   ],
+                                                                                         "executionTime":  1,
+                                                                                         "executionStatus":  "success",
+                                                                                         "data":  {
+                                                                                                      "main":  [
+                                                                                                                   [
+                                                                                                                       {
+                                                                                                                           "json":  {
+
+                                                                                                                                    },
+                                                                                                                           "pairedItem":  {
+                                                                                                                                              "item":  0
+                                                                                                                                          }
+                                                                                                                       }
+                                                                                                                   ]
+                                                                                                               ]
+                                                                                                  }
+                                                                                     }
+                                                                                 ],
+                                                    "Generar Filas Cobros (Code)":  [
+                                                                                        {
+                                                                                            "startTime":  1775675970903,
+                                                                                            "executionIndex":  1,
+                                                                                            "source":  [
+                                                                                                           {
+                                                                                                               "previousNode":  "Cron Diario Cobros 08:00",
+                                                                                                               "previousNodeOutput":  0,
+                                                                                                               "previousNodeRun":  0
+                                                                                                           }
+                                                                                                       ],
+                                                                                            "hints":  [
+
+                                                                                                      ],
+                                                                                            "executionTime":  758,
+                                                                                            "executionStatus":  "success",
+                                                                                            "data":  {
+                                                                                                         "main":  [
+                                                                                                                      [
+                                                                                                                          {
+                                                                                                                              "json":  {
+                                                                                                                                           "DOCUMENTO":  "10003",
+                                                                                                                                           "RAZON_SOCIAL":  "Comercial Demo C SC",
+                                                                                                                                           "TELEFONO":  "5219932097078",
+                                                                                                                                           "FECHA_VENCIMIENTO":  "03/01/2026",
+                                                                                                                                           "SALDO_ORIGINAL":  3000,
+                                                                                                                                           "PAGO_ACUMULADO":  3000,
+                                                                                                                                           "SALDO_PENDIENTE":  0,
+                                                                                                                                           "FECHA_ULTIMO_ABONO":  "",
+                                                                                                                                           "STATUS_PAGO":  "Pagado"
+                                                                                                                                       },
+                                                                                                                              "pairedItem":  {
+                                                                                                                                                 "item":  0
+                                                                                                                                             }
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                              "json":  {
+                                                                                                                                           "DOCUMENTO":  "10004",
+                                                                                                                                           "RAZON_SOCIAL":  "Abastecedora Demo D SA de CV",
+                                                                                                                                           "TELEFONO":  "5219932508575",
+                                                                                                                                           "FECHA_VENCIMIENTO":  "04/06/2026",
+                                                                                                                                           "SALDO_ORIGINAL":  10000,
+                                                                                                                                           "PAGO_ACUMULADO":  4000,
+                                                                                                                                           "SALDO_PENDIENTE":  6000,
+                                                                                                                                           "FECHA_ULTIMO_ABONO":  "",
+                                                                                                                                           "STATUS_PAGO":  "Abonado"
+                                                                                                                                       },
+                                                                                                                              "pairedItem":  {
+                                                                                                                                                 "item":  0
+                                                                                                                                             }
+                                                                                                                          }
+                                                                                                                      ]
+                                                                                                                  ]
+                                                                                                     }
+                                                                                        }
+                                                                                    ],
+                                                    "Renombrar Columnas":  [
+                                                                               {
+                                                                                   "startTime":  1775675971661,
+                                                                                   "executionIndex":  2,
+                                                                                   "source":  [
+                                                                                                  {
+                                                                                                      "previousNode":  "Generar Filas Cobros (Code)",
+                                                                                                      "previousNodeOutput":  0,
+                                                                                                      "previousNodeRun":  0
+                                                                                                  }
+                                                                                              ],
+                                                                                   "hints":  [
+
+                                                                                             ],
+                                                                                   "executionTime":  5,
+                                                                                   "executionStatus":  "success",
+                                                                                   "data":  {
+                                                                                                "main":  [
+                                                                                                             [
+                                                                                                                 {
+                                                                                                                     "json":  {
+                                                                                                                                  "Documento / Factura":  "10003",
+                                                                                                                                  "Razon Social":  "Comercial Demo C SC",
+                                                                                                                                  "Telefono":  "5219932097078",
+                                                                                                                                  "Fecha Vencimiento":  "03/01/2026",
+                                                                                                                                  "Saldo Original":  3000,
+                                                                                                                                  "Pago Acumulado":  3000,
+                                                                                                                                  "Saldo Pendiente":  0,
+                                                                                                                                  "Fecha Ultimo Abono":  "",
+                                                                                                                                  "Estatus Pago":  "Pagado"
+                                                                                                                              },
+                                                                                                                     "pairedItem":  {
+                                                                                                                                        "item":  0
+                                                                                                                                    }
+                                                                                                                 },
+                                                                                                                 {
+                                                                                                                     "json":  {
+                                                                                                                                  "Documento / Factura":  "10004",
+                                                                                                                                  "Razon Social":  "Abastecedora Demo D SA de CV",
+                                                                                                                                  "Telefono":  "5219932508575",
+                                                                                                                                  "Fecha Vencimiento":  "04/06/2026",
+                                                                                                                                  "Saldo Original":  10000,
+                                                                                                                                  "Pago Acumulado":  4000,
+                                                                                                                                  "Saldo Pendiente":  6000,
+                                                                                                                                  "Fecha Ultimo Abono":  "",
+                                                                                                                                  "Estatus Pago":  "Abonado"
+                                                                                                                              },
+                                                                                                                     "pairedItem":  {
+                                                                                                                                        "item":  1
+                                                                                                                                    }
+                                                                                                                 }
+                                                                                                             ]
+                                                                                                         ]
+                                                                                            }
+                                                                               }
+                                                                           ],
+                                                    "Convertir a Excel":  [
+                                                                              {
+                                                                                  "startTime":  1775675971666,
+                                                                                  "executionIndex":  3,
+                                                                                  "source":  [
+                                                                                                 {
+                                                                                                     "previousNode":  "Renombrar Columnas",
+                                                                                                     "previousNodeOutput":  0,
+                                                                                                     "previousNodeRun":  0
+                                                                                                 }
+                                                                                             ],
+                                                                                  "hints":  [
+
+                                                                                            ],
+                                                                                  "executionTime":  10,
+                                                                                  "executionStatus":  "success",
+                                                                                  "data":  {
+                                                                                               "main":  [
+                                                                                                            [
+                                                                                                                {
+                                                                                                                    "json":  {
+
+                                                                                                                             },
+                                                                                                                    "binary":  {
+                                                                                                                                   "data":  {
+                                                                                                                                                "mimeType":  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                                                                                                                                "fileExtension":  "xlsx",
+                                                                                                                                                "data":  "filesystem-v2",
+                                                                                                                                                "fileName":  "spreadsheet.xlsx",
+                                                                                                                                                "id":  "filesystem-v2:workflows/HW1MLmCmpwP6BmYl/executions/24584/binary_data/fead3f6b-8e71-4ab8-a955-13820837d8e4",
+                                                                                                                                                "fileSize":  "16.8 kB",
+                                                                                                                                                "bytes":  16839
+                                                                                                                                            }
+                                                                                                                               },
+                                                                                                                    "pairedItem":  [
+                                                                                                                                       {
+                                                                                                                                           "item":  0
+                                                                                                                                       },
+                                                                                                                                       {
+                                                                                                                                           "item":  1
+                                                                                                                                       }
+                                                                                                                                   ]
+                                                                                                                }
+                                                                                                            ]
+                                                                                                        ]
+                                                                                           }
+                                                                              }
+                                                                          ],
+                                                    "Preparar Sheets Estado+Historico (Code)":  [
+                                                                                                    {
+                                                                                                        "startTime":  1775675971677,
+                                                                                                        "executionIndex":  4,
+                                                                                                        "source":  [
+                                                                                                                       {
+                                                                                                                           "previousNode":  "Renombrar Columnas",
+                                                                                                                           "previousNodeOutput":  0,
+                                                                                                                           "previousNodeRun":  0
+                                                                                                                       }
+                                                                                                                   ],
+                                                                                                        "hints":  [
+
+                                                                                                                  ],
+                                                                                                        "executionTime":  7,
+                                                                                                        "executionStatus":  "error",
+                                                                                                        "error":  {
+                                                                                                                      "level":  "error",
+                                                                                                                      "tags":  {
+
+                                                                                                                               },
+                                                                                                                      "description":  "TypeError",
+                                                                                                                      "lineNumber":  3,
+                                                                                                                      "message":  "this.getWorkflowStaticData is not a function [line 3]",
+                                                                                                                      "stack":  "TypeError: this.getWorkflowStaticData is not a function\n    at VmCodeWrapper (evalmachine.\u003canonymous\u003e:3:25)\n    at evalmachine.\u003canonymous\u003e:50:2\n    at Script.runInContext (node:vm:149:12)\n    at runInContext (node:vm:301:6)\n    at result (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_eb51b38615a039445701c88b088f88d0/node_modules/@n8n/task-runner/dist/js-task-runner/js-task-runner.js:185:61)\n    at new Promise (\u003canonymous\u003e)\n    at JsTaskRunner.runForAllItems (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_eb51b38615a039445701c88b088f88d0/node_modules/@n8n/task-runner/dist/js-task-runner/js-task-runner.js:178:34)\n    at JsTaskRunner.executeTask (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_eb51b38615a039445701c88b088f88d0/node_modules/@n8n/task-runner/dist/js-task-runner/js-task-runner.js:128:26)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.waitingForSettings (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/@n8n+task-runner@file+packages+@n8n+task-runner_@opentelemetry+api@1.9.0_@opentelemetry_eb51b38615a039445701c88b088f88d0/node_modules/@n8n/task-runner/dist/task-runner.js:256:17)"
+                                                                                                                  }
+                                                                                                    }
+                                                                                                ]
+                                                },
+                                    "pinData":  {
+
+                                                },
+                                    "lastNodeExecuted":  "Preparar Sheets Estado+Historico (Code)"
+                                },
+                 "executionData":  {
+                                       "contextData":  {
+
+                                                       },
+                                       "nodeExecutionStack":  [
+                                                                  {
+                                                                      "node":  {
+                                                                                   "parameters":  {
+                                                                                                      "mode":  "runOnceForAllItems",
+                                                                                                      "language":  "javaScript",
+                                                                                                      "jsCode":  "\nconst inputRows = $input.all().map(i =\u003e i.json || {});\nconst staticData = this.getWorkflowStaticData(\u0027global\u0027);\nif (!staticData.histSignatures || typeof staticData.histSignatures !== \u0027object\u0027) {\n  staticData.histSignatures = {};\n}\n\nfunction toNum(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }\nfunction to2(v){ return Number(toNum(v).toFixed(2)); }\nfunction nowIso(){ return new Date().toISOString(); }\n\nconst headerEstado = [\u0027DOCUMENTO\u0027,\u0027RAZON_SOCIAL\u0027,\u0027TELEFONO\u0027,\u0027FECHA_VENCIMIENTO\u0027,\u0027SALDO_ORIGINAL\u0027,\u0027PAGO_ACUMULADO\u0027,\u0027SALDO_PENDIENTE\u0027,\u0027FECHA_ULTIMO_ABONO\u0027,\u0027STATUS_PAGO\u0027,\u0027FUENTE\u0027,\u0027LEAD_ID\u0027];\nconst estadoRows = [];\nconst historicoRows = [];\n\nfor (const r of inputRows) {\n  const documento = String(r.DOCUMENTO || \u0027\u0027).trim();\n  if (!documento) continue;\n  const razon = String(r.RAZON_SOCIAL || \u0027\u0027).trim();\n  const telefono = String(r.TELEFONO || \u0027\u0027).trim();\n  const fechaV = String(r.FECHA_VENCIMIENTO || \u0027\u0027).trim();\n  const saldoOriginal = to2(r.SALDO_ORIGINAL);\n  const pagoAc = to2(r.PAGO_ACUMULADO);\n  const saldoPend = to2(r.SALDO_PENDIENTE);\n  const fechaAb = String(r.FECHA_ULTIMO_ABONO || \u0027\u0027).trim();\n  const statusPago = String(r.STATUS_PAGO || (saldoPend \u003c= 0 ? \u0027Pagado\u0027 : (pagoAc \u003e 0 ? \u0027Abonado\u0027 : \u0027No Pagado\u0027))).trim();\n  const fuente = \u0027reporte_cobros\u0027;\n  const leadId = String(r.LEAD_ID || \u0027\u0027).trim();\n\n  estadoRows.push([documento, razon, telefono, fechaV, saldoOriginal, pagoAc, saldoPend, fechaAb, statusPago, fuente, leadId]);\n\n  const sig = [pagoAc, saldoPend, fechaAb, statusPago].join(\u0027|\u0027);\n  const prev = String(staticData.histSignatures[documento] || \u0027\u0027);\n  if (sig !== prev) {\n    historicoRows.push([nowIso(), documento, razon, telefono, saldoOriginal, pagoAc, saldoPend, fechaAb, statusPago, fuente, leadId]);\n    staticData.histSignatures[documento] = sig;\n  }\n}\n\nestadoRows.sort((a,b) =\u003e String(a[0]).localeCompare(String(b[0])));\nconst estadoValues = [headerEstado, ...estadoRows];\n\nreturn [{ json: {\n  estadoValues,\n  estadoCount: estadoRows.length,\n  historicoValues: historicoRows,\n  historicoCount: historicoRows.length,\n} }];\n",
+                                                                                                      "notice":  ""
+                                                                                                  },
+                                                                                   "id":  "sheet-prep-report-001",
+                                                                                   "name":  "Preparar Sheets Estado+Historico (Code)",
+                                                                                   "type":  "n8n-nodes-base.code",
+                                                                                   "typeVersion":  2,
+                                                                                   "position":  [
+                                                                                                    864,
+                                                                                                    528
+                                                                                                ]
+                                                                               },
+                                                                      "data":  {
+                                                                                   "main":  [
+                                                                                                [
+                                                                                                    {
+                                                                                                        "json":  {
+                                                                                                                     "Documento / Factura":  "10003",
+                                                                                                                     "Razon Social":  "Comercial Demo C SC",
+                                                                                                                     "Telefono":  "5219932097078",
+                                                                                                                     "Fecha Vencimiento":  "03/01/2026",
+                                                                                                                     "Saldo Original":  3000,
+                                                                                                                     "Pago Acumulado":  3000,
+                                                                                                                     "Saldo Pendiente":  0,
+                                                                                                                     "Fecha Ultimo Abono":  "",
+                                                                                                                     "Estatus Pago":  "Pagado"
+                                                                                                                 },
+                                                                                                        "pairedItem":  {
+                                                                                                                           "item":  0
+                                                                                                                       }
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "json":  {
+                                                                                                                     "Documento / Factura":  "10004",
+                                                                                                                     "Razon Social":  "Abastecedora Demo D SA de CV",
+                                                                                                                     "Telefono":  "5219932508575",
+                                                                                                                     "Fecha Vencimiento":  "04/06/2026",
+                                                                                                                     "Saldo Original":  10000,
+                                                                                                                     "Pago Acumulado":  4000,
+                                                                                                                     "Saldo Pendiente":  6000,
+                                                                                                                     "Fecha Ultimo Abono":  "",
+                                                                                                                     "Estatus Pago":  "Abonado"
+                                                                                                                 },
+                                                                                                        "pairedItem":  {
+                                                                                                                           "item":  1
+                                                                                                                       }
+                                                                                                    }
+                                                                                                ]
+                                                                                            ]
+                                                                               },
+                                                                      "source":  {
+                                                                                     "main":  [
+                                                                                                  {
+                                                                                                      "previousNode":  "Renombrar Columnas",
+                                                                                                      "previousNodeOutput":  0,
+                                                                                                      "previousNodeRun":  0
+                                                                                                  }
+                                                                                              ]
+                                                                                 }
+                                                                  },
+                                                                  {
+                                                                      "node":  {
+                                                                                   "parameters":  {
+                                                                                                      "authentication":  "oAuth2",
+                                                                                                      "resource":  "file",
+                                                                                                      "operation":  "update",
+                                                                                                      "fileId":  {
+                                                                                                                     "__rl":  true,
+                                                                                                                     "value":  "1yJsnkm7MzcikPKHgPq-Jo9Aj6u15NTYl",
+                                                                                                                     "mode":  "id"
+                                                                                                                 },
+                                                                                                      "changeFileContent":  true,
+                                                                                                      "inputDataFieldName":  "data",
+                                                                                                      "newUpdatedFileName":  "",
+                                                                                                      "options":  {
+
+                                                                                                                  }
+                                                                                                  },
+                                                                                   "id":  "drive-cobros-01",
+                                                                                   "name":  "Subir a Drive",
+                                                                                   "type":  "n8n-nodes-base.googleDrive",
+                                                                                   "typeVersion":  3,
+                                                                                   "position":  [
+                                                                                                    1088,
+                                                                                                    304
+                                                                                                ],
+                                                                                   "credentials":  {
+                                                                                                       "googleDriveOAuth2Api":  {
+                                                                                                                                    "id":  "p9Jf1xjKDCPCYy1s",
+                                                                                                                                    "name":  "Google Drive account 2"
+                                                                                                                                }
+                                                                                                   }
+                                                                               },
+                                                                      "data":  {
+                                                                                   "main":  [
+                                                                                                [
+                                                                                                    {
+                                                                                                        "json":  {
+
+                                                                                                                 },
+                                                                                                        "binary":  {
+                                                                                                                       "data":  {
+                                                                                                                                    "mimeType":  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                                                                                                                    "fileExtension":  "xlsx",
+                                                                                                                                    "data":  "filesystem-v2",
+                                                                                                                                    "fileName":  "spreadsheet.xlsx",
+                                                                                                                                    "id":  "filesystem-v2:workflows/HW1MLmCmpwP6BmYl/executions/24584/binary_data/fead3f6b-8e71-4ab8-a955-13820837d8e4",
+                                                                                                                                    "fileSize":  "16.8 kB",
+                                                                                                                                    "bytes":  16839
+                                                                                                                                }
+                                                                                                                   },
+                                                                                                        "pairedItem":  [
+                                                                                                                           {
+                                                                                                                               "item":  0
+                                                                                                                           },
+                                                                                                                           {
+                                                                                                                               "item":  1
+                                                                                                                           }
+                                                                                                                       ]
+                                                                                                    }
+                                                                                                ]
+                                                                                            ]
+                                                                               },
+                                                                      "source":  {
+                                                                                     "main":  [
+                                                                                                  {
+                                                                                                      "previousNode":  "Convertir a Excel",
+                                                                                                      "previousNodeOutput":  0,
+                                                                                                      "previousNodeRun":  0
+                                                                                                  }
+                                                                                              ]
+                                                                                 }
+                                                                  }
+                                                              ],
+                                       "metadata":  {
+
+                                                    },
+                                       "waitingExecution":  {
+
+                                                            },
+                                       "waitingExecutionSource":  {
+
+                                                                  },
+                                       "runtimeData":  {
+                                                           "version":  1,
+                                                           "establishedAt":  1775675970900,
+                                                           "source":  "manual",
+                                                           "triggerNode":  {
+                                                                               "name":  "Cron Diario Cobros 08:00",
+                                                                               "type":  "n8n-nodes-base.cron"
+                                                                           }
+                                                       }
+                                   }
+             },
+    "workflowData":  {
+                         "id":  "HW1MLmCmpwP6BmYl",
+                         "name":  "Kommo Cobranzas - Reporte Excel Diario",
+                         "active":  false,
+                         "activeVersionId":  null,
+                         "nodes":  [
+                                       {
+                                           "parameters":  {
+                                                              "notice":  "",
+                                                              "triggerTimes":  {
+                                                                                   "item":  [
+                                                                                                {
+                                                                                                    "mode":  "everyDay",
+                                                                                                    "hour":  8,
+                                                                                                    "minute":  0
+                                                                                                }
+                                                                                            ]
+                                                                               }
+                                                          },
+                                           "id":  "cron-cobros-01",
+                                           "name":  "Cron Diario Cobros 08:00",
+                                           "type":  "n8n-nodes-base.cron",
+                                           "typeVersion":  1,
+                                           "position":  [
+                                                            240,
+                                                            304
+                                                        ]
+                                       },
+                                       {
+                                           "parameters":  {
+                                                              "mode":  "runOnceForAllItems",
+                                                              "language":  "javaScript",
+                                                              "jsCode":  "\nconst CFG = {\"baseUrl\":\"https://agroriegoscorp.kommo.com\",\"token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjEyNjBhODkxNjZlMWZiNTI1MGVkZTFlNzVhY2ZhYjY3NWUxMjIyYzBmNjhlZjk5YTkxODhlNzRlODJiODVjYmYxMTY1ZTcwMDBiYmQ3NzliIn0.eyJhdWQiOiJkNGZjYmE0MS03NTM1LTQzOWYtOTk5Yy00YjZlNzA3NGUzMzIiLCJqdGkiOiIxMjYwYTg5MTY2ZTFmYjUyNTBlZGUxZTc1YWNmYWI2NzVlMTIyMmMwZjY4ZWY5OWE5MTg4ZTc0ZTgyYjg1Y2JmMTE2NWU3MDAwYmJkNzc5YiIsImlhdCI6MTc3NDM5MDcwOSwibmJmIjoxNzc0MzkwNzA5LCJleHAiOjE5MDY0MTYwMDAsInN1YiI6IjE1MDA0MDE5IiwiZ3JhbnRfdHlwZSI6IiIsImFjY291bnRfaWQiOjM2MjQ4Nzg3LCJiYXNlX2RvbWFpbiI6ImtvbW1vLmNvbSIsInZlcnNpb24iOjIsInNjb3BlcyI6WyJwdXNoX25vdGlmaWNhdGlvbnMiLCJmaWxlcyIsImNybSIsImZpbGVzX2RlbGV0ZSIsIm5vdGlmaWNhdGlvbnMiXSwiaGFzaF91dWlkIjoiZTkwNTZiMDUtMjUzNi00NWM4LTkyYjgtNmM1ZjhkNmZhODc0IiwiYXBpX2RvbWFpbiI6ImFwaS1jLmtvbW1vLmNvbSJ9.TRv4MRF9eVCbNJW-zjYzX4BTOUQ7p2AuM7DZx97UQyYdL81itbaILIro2nhS1rxqHXa-k3FUUtL48qK3FnZi3O9uz0jJuDeeqH2RdKNkCviTO7t5ggnVqePntPFxS5BXmlVxDpRTgHHvywJYgWBnxx92D7YJzVsubScTUbT5AY-6qPKr9hMfpQnaK6BeEZUQIFIW_vUeo5TSKN9Ngc9bpCXtWEiA9OjMVapLJXM0aw1IvyrIkr38fod26Ef9dxGrm9hyrVNS3amGNcpG9IrMEyo3d_ZcG5HQAnQ1bw2_avXhEFY0QcD0r5UmL_9uqx_pvHCCxLbVJxwDfnTO3IZDZA\",\"pipelineId\":13403731,\"tag\":\"cobranza_n8n_excel\",\"fieldIds\":{\"documento\":3272952,\"telefono\":3281414,\"fecha_venc_text\":3281430,\"saldo_pendiente\":3272956,\"pago_realizado\":3281416,\"razon_social\":3281418,\"fecha_abono\":3293960,\"status_pago\":3281432},\"statusPagoEnums\":{\"pagado\":8030168,\"abonado\":8030170,\"no_pagado\":8030172}};\n\nfunction fieldVal(lead, fieldId) {\n  const arr = Array.isArray(lead.custom_fields_values) ? lead.custom_fields_values : [];\n  const hit = arr.find((x) =\u003e Number(x.field_id) === Number(fieldId));\n  if (!hit || !Array.isArray(hit.values) || hit.values.length === 0) return \u0027\u0027;\n  const v = hit.values[0].value;\n  return v === null || v === undefined ? \u0027\u0027 : String(v);\n}\n\nfunction fieldEnumId(lead, fieldId) {\n  const arr = Array.isArray(lead.custom_fields_values) ? lead.custom_fields_values : [];\n  const hit = arr.find((x) =\u003e Number(x.field_id) === Number(fieldId));\n  if (!hit || !Array.isArray(hit.values) || hit.values.length === 0) return 0;\n  return Number(hit.values[0].enum_id || 0);\n}\n\nfunction readStatusPago(lead) {\n  const enumId = fieldEnumId(lead, CFG.fieldIds.status_pago);\n  if (enumId === CFG.statusPagoEnums.pagado) return \u0027Pagado\u0027;\n  if (enumId === CFG.statusPagoEnums.abonado) return \u0027Abonado\u0027;\n  if (enumId === CFG.statusPagoEnums.no_pagado) return \u0027No Pagado\u0027;\n  return \u0027\u0027;\n}\n\nasync function req(method, path) {\n  return await this.helpers.httpRequest({\n    method,\n    url: CFG.baseUrl + path,\n    headers: { Authorization: \u0027Bearer \u0027 + CFG.token },\n    json: true,\n    returnFullResponse: true,\n    ignoreHttpStatusErrors: true,\n  });\n}\n\nconst leads = [];\nfor (let page = 1; page \u003c= 100; page++) {\n  const res = await req(\u0027GET\u0027, \u0027/api/v4/leads?limit=250\u0026page=\u0027 + page + \u0027\u0026with=custom_fields_values,tags\u0027);\n  if (res.statusCode \u003e= 400) break;\n  const chunk = res.body?._embedded?.leads || [];\n  if (!chunk.length) break;\n  leads.push(...chunk);\n  if (!res.body?._links?.next?.href) break;\n}\n\nconst rows = [];\nfor (const lead of leads) {\n  const tags = (lead._embedded?.tags || []).map(t =\u003e String(t.name || \u0027\u0027).toLowerCase().trim());\n  if (!tags.includes(CFG.tag.toLowerCase())) continue;\n  if (Number(lead.pipeline_id) !== Number(CFG.pipelineId)) continue;\n\n  const pagoAcumulado = Number(fieldVal(lead, CFG.fieldIds.pago_realizado) || 0);\n  if (!(pagoAcumulado \u003e 0)) continue;\n\n  const saldoPendiente = Number(fieldVal(lead, CFG.fieldIds.saldo_pendiente) || 0);\n  const saldoOriginal = pagoAcumulado + saldoPendiente;\n\n  rows.push({\n    DOCUMENTO: fieldVal(lead, CFG.fieldIds.documento),\n    RAZON_SOCIAL: fieldVal(lead, CFG.fieldIds.razon_social),\n    TELEFONO: fieldVal(lead, CFG.fieldIds.telefono),\n    FECHA_VENCIMIENTO: fieldVal(lead, CFG.fieldIds.fecha_venc_text),\n    SALDO_ORIGINAL: saldoOriginal,\n    PAGO_ACUMULADO: pagoAcumulado,\n    SALDO_PENDIENTE: saldoPendiente,\n    FECHA_ULTIMO_ABONO: (() =\u003e { const ts = fieldVal(lead, CFG.fieldIds.fecha_abono); if (!ts) return \u0027\u0027; const n = Number(ts); if (!n) return ts; const d = new Date(n * 1000); return d.toLocaleDateString(\u0027es-MX\u0027, { day: \u00272-digit\u0027, month: \u00272-digit\u0027, year: \u0027numeric\u0027 }); })(),\n    STATUS_PAGO: readStatusPago(lead),\n  });\n}\n\nrows.sort((a, b) =\u003e String(a.DOCUMENTO).localeCompare(String(b.DOCUMENTO)));\n\nreturn rows.map(r =\u003e ({ json: r }));\n",
+                                                              "notice":  ""
+                                                          },
+                                           "id":  "code-cobros-01",
+                                           "name":  "Generar Filas Cobros (Code)",
+                                           "type":  "n8n-nodes-base.code",
+                                           "typeVersion":  2,
+                                           "position":  [
+                                                            480,
+                                                            304
+                                                        ]
+                                       },
+                                       {
+                                           "parameters":  {
+                                                              "operation":  "toFile",
+                                                              "fileFormat":  "xlsx",
+                                                              "binaryPropertyName":  "data",
+                                                              "options":  {
+                                                                              "headerRow":  true,
+                                                                              "sheetName":  "Cobros"
+                                                                          }
+                                                          },
+                                           "id":  "spreadsheet-cobros-01",
+                                           "name":  "Convertir a Excel",
+                                           "type":  "n8n-nodes-base.spreadsheetFile",
+                                           "typeVersion":  2,
+                                           "position":  [
+                                                            848,
+                                                            304
+                                                        ]
+                                       },
+                                       {
+                                           "parameters":  {
+                                                              "authentication":  "oAuth2",
+                                                              "resource":  "file",
+                                                              "operation":  "update",
+                                                              "fileId":  {
+                                                                             "__rl":  true,
+                                                                             "value":  "1yJsnkm7MzcikPKHgPq-Jo9Aj6u15NTYl",
+                                                                             "mode":  "id"
+                                                                         },
+                                                              "changeFileContent":  true,
+                                                              "inputDataFieldName":  "data",
+                                                              "newUpdatedFileName":  "",
+                                                              "options":  {
+
+                                                                          }
+                                                          },
+                                           "id":  "drive-cobros-01",
+                                           "name":  "Subir a Drive",
+                                           "type":  "n8n-nodes-base.googleDrive",
+                                           "typeVersion":  3,
+                                           "position":  [
+                                                            1088,
+                                                            304
+                                                        ],
+                                           "credentials":  {
+                                                               "googleDriveOAuth2Api":  {
+                                                                                            "id":  "p9Jf1xjKDCPCYy1s",
+                                                                                            "name":  "Google Drive account 2"
+                                                                                        }
+                                                           }
+                                       },
+                                       {
+                                           "parameters":  {
+                                                              "mode":  "runOnceForAllItems",
+                                                              "language":  "javaScript",
+                                                              "jsCode":  "const rows = $input.all().map(i =\u003e i.json);\nreturn rows.map(r =\u003e ({ json: {\n  \u0027Documento / Factura\u0027: r.DOCUMENTO,\n  \u0027Razon Social\u0027:        r.RAZON_SOCIAL,\n  \u0027Telefono\u0027:            r.TELEFONO,\n  \u0027Fecha Vencimiento\u0027:   r.FECHA_VENCIMIENTO,\n  \u0027Saldo Original\u0027:      r.SALDO_ORIGINAL,\n  \u0027Pago Acumulado\u0027:      r.PAGO_ACUMULADO,\n  \u0027Saldo Pendiente\u0027:     r.SALDO_PENDIENTE,\n  \u0027Fecha Ultimo Abono\u0027:  r.FECHA_ULTIMO_ABONO,\n  \u0027Estatus Pago\u0027:        r.STATUS_PAGO,\n}}));",
+                                                              "notice":  ""
+                                                          },
+                                           "id":  "code-rename-01",
+                                           "name":  "Renombrar Columnas",
+                                           "type":  "n8n-nodes-base.code",
+                                           "typeVersion":  2,
+                                           "position":  [
+                                                            640,
+                                                            304
+                                                        ]
+                                       },
+                                       {
+                                           "parameters":  {
+                                                              "mode":  "runOnceForAllItems",
+                                                              "language":  "javaScript",
+                                                              "jsCode":  "\nconst inputRows = $input.all().map(i =\u003e i.json || {});\nconst staticData = this.getWorkflowStaticData(\u0027global\u0027);\nif (!staticData.histSignatures || typeof staticData.histSignatures !== \u0027object\u0027) {\n  staticData.histSignatures = {};\n}\n\nfunction toNum(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }\nfunction to2(v){ return Number(toNum(v).toFixed(2)); }\nfunction nowIso(){ return new Date().toISOString(); }\n\nconst headerEstado = [\u0027DOCUMENTO\u0027,\u0027RAZON_SOCIAL\u0027,\u0027TELEFONO\u0027,\u0027FECHA_VENCIMIENTO\u0027,\u0027SALDO_ORIGINAL\u0027,\u0027PAGO_ACUMULADO\u0027,\u0027SALDO_PENDIENTE\u0027,\u0027FECHA_ULTIMO_ABONO\u0027,\u0027STATUS_PAGO\u0027,\u0027FUENTE\u0027,\u0027LEAD_ID\u0027];\nconst estadoRows = [];\nconst historicoRows = [];\n\nfor (const r of inputRows) {\n  const documento = String(r.DOCUMENTO || \u0027\u0027).trim();\n  if (!documento) continue;\n  const razon = String(r.RAZON_SOCIAL || \u0027\u0027).trim();\n  const telefono = String(r.TELEFONO || \u0027\u0027).trim();\n  const fechaV = String(r.FECHA_VENCIMIENTO || \u0027\u0027).trim();\n  const saldoOriginal = to2(r.SALDO_ORIGINAL);\n  const pagoAc = to2(r.PAGO_ACUMULADO);\n  const saldoPend = to2(r.SALDO_PENDIENTE);\n  const fechaAb = String(r.FECHA_ULTIMO_ABONO || \u0027\u0027).trim();\n  const statusPago = String(r.STATUS_PAGO || (saldoPend \u003c= 0 ? \u0027Pagado\u0027 : (pagoAc \u003e 0 ? \u0027Abonado\u0027 : \u0027No Pagado\u0027))).trim();\n  const fuente = \u0027reporte_cobros\u0027;\n  const leadId = String(r.LEAD_ID || \u0027\u0027).trim();\n\n  estadoRows.push([documento, razon, telefono, fechaV, saldoOriginal, pagoAc, saldoPend, fechaAb, statusPago, fuente, leadId]);\n\n  const sig = [pagoAc, saldoPend, fechaAb, statusPago].join(\u0027|\u0027);\n  const prev = String(staticData.histSignatures[documento] || \u0027\u0027);\n  if (sig !== prev) {\n    historicoRows.push([nowIso(), documento, razon, telefono, saldoOriginal, pagoAc, saldoPend, fechaAb, statusPago, fuente, leadId]);\n    staticData.histSignatures[documento] = sig;\n  }\n}\n\nestadoRows.sort((a,b) =\u003e String(a[0]).localeCompare(String(b[0])));\nconst estadoValues = [headerEstado, ...estadoRows];\n\nreturn [{ json: {\n  estadoValues,\n  estadoCount: estadoRows.length,\n  historicoValues: historicoRows,\n  historicoCount: historicoRows.length,\n} }];\n",
+                                                              "notice":  ""
+                                                          },
+                                           "id":  "sheet-prep-report-001",
+                                           "name":  "Preparar Sheets Estado+Historico (Code)",
+                                           "type":  "n8n-nodes-base.code",
+                                           "typeVersion":  2,
+                                           "position":  [
+                                                            864,
+                                                            528
+                                                        ]
+                                       },
+                                       {
+                                           "parameters":  {
+                                                              "curlImport":  "",
+                                                              "method":  "POST",
+                                                              "url":  "https://sheets.googleapis.com/v4/spreadsheets/1bmC31r3ooeWpw7aHfE9lEy6fpT3c1w49KCyaprviDrw/values/EstadoActual!A:K:clear",
+                                                              "authentication":  "predefinedCredentialType",
+                                                              "nodeCredentialType":  "googleDriveOAuth2Api",
+                                                              "provideSslCertificates":  false,
+                                                              "sendQuery":  false,
+                                                              "sendHeaders":  false,
+                                                              "sendBody":  false,
+                                                              "options":  {
+
+                                                                          },
+                                                              "infoMessage":  ""
+                                                          },
+                                           "id":  "sheet-clear-estado-001",
+                                           "name":  "Sheets Limpiar EstadoActual",
+                                           "type":  "n8n-nodes-base.httpRequest",
+                                           "typeVersion":  4,
+                                           "position":  [
+                                                            1120,
+                                                            480
+                                                        ],
+                                           "credentials":  {
+                                                               "googleDriveOAuth2Api":  {
+                                                                                            "id":  "p9Jf1xjKDCPCYy1s",
+                                                                                            "name":  "Google Drive account 2"
+                                                                                        }
+                                                           }
+                                       },
+                                       {
+                                           "parameters":  {
+                                                              "curlImport":  "",
+                                                              "method":  "PUT",
+                                                              "url":  "https://sheets.googleapis.com/v4/spreadsheets/1bmC31r3ooeWpw7aHfE9lEy6fpT3c1w49KCyaprviDrw/values/EstadoActual!A1?valueInputOption=USER_ENTERED",
+                                                              "authentication":  "predefinedCredentialType",
+                                                              "nodeCredentialType":  "googleDriveOAuth2Api",
+                                                              "provideSslCertificates":  false,
+                                                              "sendQuery":  false,
+                                                              "sendHeaders":  false,
+                                                              "sendBody":  true,
+                                                              "contentType":  "json",
+                                                              "specifyBody":  "keypair",
+                                                              "bodyParameters":  {
+                                                                                     "parameters":  [
+                                                                                                        {
+                                                                                                            "name":  "",
+                                                                                                            "value":  ""
+                                                                                                        }
+                                                                                                    ]
+                                                                                 },
+                                                              "options":  {
+
+                                                                          },
+                                                              "infoMessage":  ""
+                                                          },
+                                           "id":  "sheet-write-estado-001",
+                                           "name":  "Sheets Escribir EstadoActual",
+                                           "type":  "n8n-nodes-base.httpRequest",
+                                           "typeVersion":  4,
+                                           "position":  [
+                                                            1392,
+                                                            480
+                                                        ],
+                                           "credentials":  {
+                                                               "googleDriveOAuth2Api":  {
+                                                                                            "id":  "p9Jf1xjKDCPCYy1s",
+                                                                                            "name":  "Google Drive account 2"
+                                                                                        }
+                                                           }
+                                       },
+                                       {
+                                           "parameters":  {
+                                                              "conditions":  {
+                                                                                 "options":  {
+                                                                                                 "caseSensitive":  true,
+                                                                                                 "leftValue":  "",
+                                                                                                 "typeValidation":  "strict",
+                                                                                                 "version":  2
+                                                                                             },
+                                                                                 "conditions":  [
+                                                                                                    {
+                                                                                                        "id":  "hist-count-gt-0",
+                                                                                                        "leftValue":  "={{ $json.historicoCount }}",
+                                                                                                        "rightValue":  0,
+                                                                                                        "operator":  {
+                                                                                                                         "type":  "number",
+                                                                                                                         "operation":  "gt"
+                                                                                                                     }
+                                                                                                    }
+                                                                                                ],
+                                                                                 "combinator":  "and"
+                                                                             },
+                                                              "options":  {
+
+                                                                          }
+                                                          },
+                                           "id":  "sheet-if-hist-report-001",
+                                           "name":  "Historico Tiene Cambios?",
+                                           "type":  "n8n-nodes-base.if",
+                                           "typeVersion":  2,
+                                           "position":  [
+                                                            1120,
+                                                            624
+                                                        ]
+                                       },
+                                       {
+                                           "parameters":  {
+                                                              "curlImport":  "",
+                                                              "method":  "POST",
+                                                              "url":  "https://sheets.googleapis.com/v4/spreadsheets/1bmC31r3ooeWpw7aHfE9lEy6fpT3c1w49KCyaprviDrw/values/HistoricoMovimientos!A:K:append?valueInputOption=USER_ENTERED\u0026insertDataOption=INSERT_ROWS",
+                                                              "authentication":  "predefinedCredentialType",
+                                                              "nodeCredentialType":  "googleDriveOAuth2Api",
+                                                              "provideSslCertificates":  false,
+                                                              "sendQuery":  false,
+                                                              "sendHeaders":  false,
+                                                              "sendBody":  true,
+                                                              "contentType":  "json",
+                                                              "specifyBody":  "keypair",
+                                                              "bodyParameters":  {
+                                                                                     "parameters":  [
+                                                                                                        {
+                                                                                                            "name":  "",
+                                                                                                            "value":  ""
+                                                                                                        }
+                                                                                                    ]
+                                                                                 },
+                                                              "options":  {
+
+                                                                          },
+                                                              "infoMessage":  ""
+                                                          },
+                                           "id":  "sheet-append-hist-report-001",
+                                           "name":  "Sheets Append HistoricoMovimientos",
+                                           "type":  "n8n-nodes-base.httpRequest",
+                                           "typeVersion":  4,
+                                           "position":  [
+                                                            1392,
+                                                            624
+                                                        ],
+                                           "credentials":  {
+                                                               "googleDriveOAuth2Api":  {
+                                                                                            "id":  "p9Jf1xjKDCPCYy1s",
+                                                                                            "name":  "Google Drive account 2"
+                                                                                        }
+                                                           }
+                                       }
+                                   ],
+                         "connections":  {
+                                             "Cron Diario Cobros 08:00":  {
+                                                                              "main":  [
+                                                                                           [
+                                                                                               {
+                                                                                                   "node":  "Generar Filas Cobros (Code)",
+                                                                                                   "type":  "main",
+                                                                                                   "index":  0
+                                                                                               }
+                                                                                           ]
+                                                                                       ]
+                                                                          },
+                                             "Generar Filas Cobros (Code)":  {
+                                                                                 "main":  [
+                                                                                              [
+                                                                                                  {
+                                                                                                      "node":  "Renombrar Columnas",
+                                                                                                      "type":  "main",
+                                                                                                      "index":  0
+                                                                                                  }
+                                                                                              ]
+                                                                                          ]
+                                                                             },
+                                             "Renombrar Columnas":  {
+                                                                        "main":  [
+                                                                                     [
+                                                                                         {
+                                                                                             "node":  "Convertir a Excel",
+                                                                                             "type":  "main",
+                                                                                             "index":  0
+                                                                                         },
+                                                                                         {
+                                                                                             "node":  "Preparar Sheets Estado+Historico (Code)",
+                                                                                             "type":  "main",
+                                                                                             "index":  0
+                                                                                         }
+                                                                                     ]
+                                                                                 ]
+                                                                    },
+                                             "Convertir a Excel":  {
+                                                                       "main":  [
+                                                                                    [
+                                                                                        {
+                                                                                            "node":  "Subir a Drive",
+                                                                                            "type":  "main",
+                                                                                            "index":  0
+                                                                                        }
+                                                                                    ]
+                                                                                ]
+                                                                   },
+                                             "Subir a Drive":  {
+                                                                   "main":  [
+                                                                                [
+
+                                                                                ]
+                                                                            ]
+                                                               },
+                                             "Preparar Sheets Estado+Historico (Code)":  {
+                                                                                             "main":  [
+                                                                                                          [
+                                                                                                              {
+                                                                                                                  "node":  "Sheets Limpiar EstadoActual",
+                                                                                                                  "type":  "main",
+                                                                                                                  "index":  0
+                                                                                                              },
+                                                                                                              {
+                                                                                                                  "node":  "Historico Tiene Cambios?",
+                                                                                                                  "type":  "main",
+                                                                                                                  "index":  0
+                                                                                                              }
+                                                                                                          ]
+                                                                                                      ]
+                                                                                         },
+                                             "Sheets Limpiar EstadoActual":  {
+                                                                                 "main":  [
+                                                                                              [
+                                                                                                  {
+                                                                                                      "node":  "Sheets Escribir EstadoActual",
+                                                                                                      "type":  "main",
+                                                                                                      "index":  0
+                                                                                                  }
+                                                                                              ]
+                                                                                          ]
+                                                                             },
+                                             "Historico Tiene Cambios?":  {
+                                                                              "main":  [
+                                                                                           [
+                                                                                               {
+                                                                                                   "node":  "Sheets Append HistoricoMovimientos",
+                                                                                                   "type":  "main",
+                                                                                                   "index":  0
+                                                                                               }
+                                                                                           ]
+                                                                                       ]
+                                                                          }
+                                         },
+                         "settings":  {
+                                          "callerPolicy":  "workflowsFromSameOwner",
+                                          "availableInMCP":  false
+                                      },
+                         "pinData":  {
+
+                                     }
+                     },
+    "customData":  {
+
+                   }
+}

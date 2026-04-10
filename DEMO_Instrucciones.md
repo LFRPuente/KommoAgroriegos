@@ -1,6 +1,6 @@
 # Demo Cobranza Automatizada — Instrucciones
 
-**Fecha:** 2026-04-06  
+**Fecha:** 2026-04-07  
 **Duración estimada:** 10–15 minutos  
 **Archivo Excel:** `DEMO_Cobranza_2026-04-01.xlsx`
 
@@ -10,10 +10,10 @@
 
 | Color | Doc | Lead | Situación | Resultado esperado |
 |-------|-----|------|-----------|-------------------|
-| 🟠 | 10001 | Empresa Demo A | Vence el **11 abr** (d=5) | Auto → **Recordatorio 5 Dias** + WhatsApp |
-| 🔴 | 10002 | Distribuidora Demo B | Venció el **5 abr** (d=-1) — **No pagó** | Manual → **Deadline** + WhatsApp |
-| 🔵 | 10004 | Abastecedora Demo D | Venció el **5 abr** (d=-1) — **Abonó** $4,000 de $10,000 | Manual → **Deadline - Abono** + WhatsApp |
-| 🟡 | 10005 | Proveedora Demo E | Vence el **14 abr** (d=8) — **No pagó** (aún no vence) | Manual → **No Pagado** (se queda ahí hasta que venza) |
+| 🟠 | 10001 | Empresa Demo A | Vence el **12 abr** (d=5) | Auto → **Recordatorio 5 Dias** + WhatsApp |
+| 🔴 | 10002 | Distribuidora Demo B | Venció el **6 abr** (d=-1) — **No pagó** | Manual → **Deadline** + WhatsApp |
+| 🔵 | 10004 | Abastecedora Demo D | Venció el **6 abr** (d=-1) — **Abonó** $4,000 de $10,000 | Manual → **Deadline - Abono** + WhatsApp |
+| 🟡 | 10005 | Proveedora Demo E | Vence el **15 abr** (d=8) — **No pagó** (aún no vence) | Manual → **No Pagado** (se queda ahí hasta que venza) |
 | 🟢 | 10003 | Comercial Demo C | **Pagó completo** | Manual → **Pagado** |
 
 Todos los mensajes llegan al número **+52 917 158 8969**.

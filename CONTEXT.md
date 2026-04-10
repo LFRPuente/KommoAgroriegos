@@ -272,3 +272,118 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 - Outbound reply via salesbot: ⚠️ salesbot runs but field reference needs manual fix in Kommo UI (`{{lead.cf.3281424}}`)
 - Reporte Excel cobros diario: ✅ workflow `HW1MLmCmpwP6BmYl` activo, corre a las 08:00, sube `cobros_YYYY-MM-DD.xlsx` a Drive
 - Salesbot `39734` configurado para `deadline - abono`: ✅ trigger por etapa configurado en Kommo UI
+
+## Verified Update (April 7, 2026)
+
+### Reporte Excel Maestro - Current Behavior
+- Workflow: `Kommo Cobranzas - Reporte Excel Diario` (`HW1MLmCmpwP6BmYl`)
+- Drive mode: `File -> Update` to a single master file (not `create` per day)
+- Master file id: `1yJsnkm7MzcikPKHgPq-Jo9Aj6u15NTYl`
+- Expected behavior: each run rebuilds rows from current Kommo state and overwrites the same file (snapshot behavior)
+
+### Incident and Fix Applied
+- Symptom: upstream nodes produced rows, but Excel file content was not changing in Drive.
+- Root cause: in Google Drive update node, `Change File Content` was disabled.
+- Fix: enabled `Change File Content` and kept binary input field as `data`.
+- Result: file content replacement started working.
+
+### Validation Performed
+- Using the same logic as `Generar Filas Cobros (Code)`, Kommo returned 2 leads with payment amount > 0.
+- Example lead IDs found in validation: `60062350`, `60062360`.
+
+### Operational Note Added
+- For Drive `File -> Update` replacing binary content, always verify:
+  - `Change File Content = ON`
+  - `Input Data Field Name` equals binary property from previous node (`data` in current workflow)
+
+### Historical Caveat
+- Current report is not immutable history.
+- It is a live snapshot of leads that currently match the filter (`tag + pipeline + pago_realizado > 0`).
+- If a lead later stops matching the filter, it can disappear from the report on next run.
+
+## Verified Update (April 8, 2026)
+
+### Google Sheets Migration for Real History (Live Deployed)
+- Live workflow updated: `gfJm4JUoiUi7zZgaB2ob0` (`Kommo Cuentas por Cobrar (Ingesta via HTTP)`).
+- Spreadsheet target: `1bmC31r3ooeWpw7aHfE9lEy6fpT3c1w49KCyaprviDrw`.
+- Credential used in new nodes: `Google Drive account 2` (`p9Jf1xjKDCPCYy1s`).
+
+### New Behavior
+- **EstadoActual** tab: upsert by `DOCUMENTO` (same factura updates row, new factura appends row).
+- **HistoricoMovimientos** tab: append-only from payment events (`Cobranza OCR + Abono`).
+- Ingest path (`Upsert Lead+Contacto`) now also syncs `EstadoActual`.
+
+### New Nodes Added in Live Workflow
+- `Preparar Estado Factura (Code)`
+- `Estado Sync?`
+- `Historico Sync?`
+- `Sheets Estado Lookup Col A`
+- `Sheets Estado Resolver Fila (Code)`
+- `Sheets Estado Existe?`
+- `Sheets Estado Update Row`
+- `Sheets Estado Append Row`
+- `Sheets Historico Append Row`
+
+### Wiring Added
+- `Upsert Lead+Contacto (Code)` now also routes to `Preparar Estado Factura (Code)`.
+- `Cobranza OCR + Abono` now also routes to `Preparar Estado Factura (Code)`.
+
+### Required Sheet Tabs
+- `EstadoActual`
+- `HistoricoMovimientos`
+
+If these tab names do not exist exactly, Google Sheets API calls will fail with range errors.
+
+## Correction Note (April 8, 2026)
+
+- User requested the Sheets historical logic to live in `Kommo Cobranzas - Reporte Excel Diario` (`HW1MLmCmpwP6BmYl`), not in `Kommo Cuentas por Cobrar` (`gfJm4JUoiUi7zZgaB2ob0`).
+- `gfJm4JUoiUi7zZgaB2ob0` was restored to its pre-change backup state.
+- Sheets logic was moved to `HW1MLmCmpwP6BmYl` with these nodes:
+  - `Preparar Sheets Estado+Historico (Code)`
+  - `Sheets Limpiar EstadoActual`
+  - `Sheets Escribir EstadoActual`
+  - `Historico Tiene Cambios?`
+  - `Sheets Append HistoricoMovimientos`
+- Current behavior in `HW1...`:
+  - Keeps original XLSX update path intact.
+  - Also writes `EstadoActual` snapshot into Google Sheets.
+  - Appends to `HistoricoMovimientos` only when a document signature changes (tracked in workflow static data).
+
+## Verified Update (April 9, 2026)
+
+### Current Blocking Issue
+- Google credential `Google Drive account 2` is currently invalid/expired in n8n (OAuth grant/refresh token error).
+- This is blocking:
+  - `HW1MLmCmpwP6BmYl` executions at node `Sheets Leer HistoricoMovimientos`.
+  - Activation/publish of `gfJm4JUoiUi7zZgaB2ob0` webhook workflow (`Active version not found` until workflow can be activated).
+
+### Reporte Excel Workflow (`HW1MLmCmpwP6BmYl`)
+- Workflow connections were repaired after corruption (invalid `connections.main` shapes prevented opening in UI).
+- `EstadoActual` write fix is live:
+  - `Sheets Limpiar EstadoActual` -> `Sheets Escribir EstadoActual` with append body from `Preparar Sheets Estado+Historico (Code)`.
+- Historical dedupe path is wired:
+  - `Renombrar Columnas` -> `Sheets Leer HistoricoMovimientos` -> `Preparar Sheets Estado+Historico (Code)`.
+  - `Preparar...` compares current signature vs last signature by `DOCUMENTO` from sheet history before appending.
+
+### Cobranza Agent Scope Redirect (`gfJm4JUoiUi7zZgaB2ob0`)
+- Prompt update applied in `AI Agent Cobranza`:
+  - Added explicit rule: if user asks business info outside cobranza, reply with redirect to Alfredo `+58 424-7048245` and sales advisor.
+- Fallback enforcement applied in `Parsear Cobranza Agent (Code)`:
+  - Added `outsideCobranzaRegex`.
+  - Forces non-payment processing and fixed redirect reply text for out-of-scope business inquiries.
+
+### Test Leads Created For Validation
+- Created in Kommo (tag `cobranza_n8n_excel`):
+  - `60199968` -> `TEST-20260408-180248-P` (`Pagado`, pago `1500`, saldo `0`).
+  - `60199970` -> `TEST-20260408-180248-A` (`Abonado`, pago `1000`, saldo `500`).
+- These are intended for validating:
+  - Report sync into `EstadoActual`/`HistoricoMovimientos`.
+  - Conditional formatting by `STATUS_PAGO` (`Pagado` green, `Abonado` yellow).
+
+### Notes For Next Session
+- First action: reconnect Google credential in n8n (`Google Drive account 2`), then reactivate affected workflow(s).
+- Re-run validation sequence:
+  1. Cobranza bot out-of-scope redirect response.
+  2. Cobranza question response.
+  3. `HistoricoMovimientos` no-duplicate behavior across consecutive runs.
+  4. `STATUS_PAGO` conditional colors in Sheets.
