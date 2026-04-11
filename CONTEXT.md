@@ -23,7 +23,7 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 - n8n Webhook Endpoint (drive debug): `https://n8n.srv1388533.hstgr.cloud/webhook/codex-drive-debug-39516d57`
 - Google Drive watched folder (current): `1VDqeluDYkR6PdJvH65j_DEHoK3bTlAXF`
 - Google Drive watched folder (legacy/deprecated): `1QFbTelTwH9M_Sl-1F17KkiTgv9CqGl2`
-- Google Drive event: `fileCreated`
+- Google Drive events: `fileCreated` (trigger node 1) + `fileUpdated` (trigger node 2 — "Google Drive Trigger (Updated)")
 - Google Drive polling: every minute
 
 ### n8n Workflow IDs
@@ -119,10 +119,11 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 
 ### Excel Ingest
 - n8n reads the uploaded Excel from Drive.
-- The parser expects the real workbook layout:
-  - sheet `Hoja1`
-  - row 1 blank, row 2 blank, row 3 real headers
+- The parser expects the **standardized format (as of April 10, 2026)**:
+  - **Row 1 = headers** (`VENDEDOR`, `COD VEN`, `COD CLI`, `RAZON SOCIAL`, `TELEFONO1`, `DOCUMENTO`, ..., `FECHA VENC`, `SALDO DOC`, `PAGO`)
+  - No empty rows at the top. The old 2-empty-row format is no longer supported.
 - The workflow normalizes only the business columns it needs and ignores the rest.
+- Phone number (`TELEFONO1`) is optional — leads will be created/updated even without it.
 
 ### Lead Upsert
 - Leads are matched by `DOCUMENTO + TELEFONO`.
@@ -438,3 +439,68 @@ If these tab names do not exist exactly, Google Sheets API calls will fail with 
 - Open the Salesbot/automation configuration that sends `{{lead.cf.3281424}}`.
 - Leave only one outbound send action/branch for that trigger.
 - Re-test with one inbound `Hola` and verify only one outbound message event is created.
+
+---
+
+## Verified Update (April 10, 2026 — Session 2)
+
+### Double Message Root Cause — RESOLVED
+- Root cause confirmed: contact `101188934` had **2 active talks** (`in_work`) simultaneously — `talk_id: 137` and `talk_id: 136` — both linked to lead `60069444`.
+- When salesbot runs on a lead with 2 active talks, it sends to both → 2 identical WhatsApp messages.
+- Fix: user clicked "Separar chat" in Kommo UI on talk `136`. Result: `talk_id: 136` now has `entity_id: null` (disconnected from lead). Only `talk_id: 137` remains linked to lead `60069444`.
+- Double message should now be resolved. Verified by testing inbound "Hola" after fix.
+
+### Kommo API Constraints Found
+- `DELETE /api/v4/leads/{id}` → HTTP 405 (not allowed). Lead deletion via public API is not supported.
+- `OPTIONS /api/v4/leads/{id}` confirms only `GET` and `PATCH` are allowed.
+- To "delete" leads via API: use `PATCH` to move them to stage `142` (cerrada/Logrado con éxito). Manual bulk-delete must be done from Kommo UI.
+
+### Test Leads Cleanup (April 10, 2026)
+- 17 test leads archived to stage `142` via PATCH:
+  - Factura 10001–10005 (Demo A–E)
+  - Factura 91001–91008 (TEST clientes A–H)
+  - Prueba Abonado, Prueba Pagado, Prueba Late10, Prueba Late15
+- These remain in stage `142` in Kommo and can be bulk-deleted from UI.
+
+### AI Agent Cobranza — Prompt Fix
+- Added rule in system prompt: when `LEAD PAGADO=NO` and client sends a greeting or generic message (`intent=conversation`), `reply_text` **must explicitly state the pending balance amount** (SALDO ACTUAL) and due date.
+- Previously the bot responded with a generic "Si ya realizaste el pago, ignore este mensaje" which did not mention the amount, confusing users.
+
+### Excel Format — Standardized (No Empty Rows)
+- New required format: **first row = headers** (`VENDEDOR`, `COD VEN`, ..., `TELEFONO1`, `DOCUMENTO`, `FECHA VENC`, `SALDO DOC`, `PAGO`, etc.). No empty rows at top.
+- Old format (2 empty rows + header on row 3) is no longer supported.
+- Reference file: `DEMO_Cobranza_2026-04-10.xlsx` (generated from `DEMO_Cobranza_2026-04-07.xlsx`).
+  - Empty rows removed, due dates shifted +3 days.
+  - **Important:** when regenerating Excel with xlsx.js, use cell-level copy (`Object.assign({}, cell)`) NOT `aoa_to_sheet` — the latter drops large phone numbers stored as numeric cells.
+
+### `Limpiar Datos` Node — Updated
+- Removed all `__EMPTY_X` fallbacks (were for old 2-empty-row format).
+- Removed `if (documento === "DOCUMENTO") continue` check (no longer needed).
+- Now only uses named column keys: `"DOCUMENTO"`, `"TELEFONO1"`, `"RAZON SOCIAL"`, `"SALDO DOC"`, `"FECHA VENC"`, `"PAGO"`, etc.
+
+### `Upsert Lead+Contacto (Code)` — Two Fixes
+1. **Archived lead revival**: when existing lead is found in stage `142` (closed), now also sets `status_id: initialStatusId` + `pipeline_id` in the PATCH body, moving it back to "Leads importados" (`103388967`).
+   - Previous behavior: only moved to initial stage if found in a *different* pipeline, not if found in stage 142 of the same pipeline.
+2. **Phone number optional**: changed skip condition from `!documento || !telefono` to `!documento` only.
+   - Allows loading Excel files without phone numbers (e.g., for lead assignment testing without triggering WhatsApp messages).
+   - In production, phone number should still be present to enable salesbot messaging.
+
+### Google Drive Trigger — Dual Event Fix
+- `fileCreatedOrUpdated` is **NOT a valid event** in n8n's `googleDriveTrigger` node.
+  - Valid events: `fileCreated`, `fileUpdated`, `folderCreated`, `folderUpdated`, `watchFolderUpdated`.
+- Fix: added a **second trigger node** `Google Drive Trigger (Updated)` with `event: fileUpdated`.
+  - Original node: `Google Drive Trigger` → `event: fileCreated`
+  - New node: `Google Drive Trigger (Updated)` → `event: fileUpdated`
+  - Both connect to `Descargar Excel` → same downstream flow.
+  - Both use credential `Google Service Account account` (`L6ly13wxjLb7k0cC`).
+  - Both poll every minute, watch folder `1VDqeluDYkR6PdJvH65j_DEHoK3bTlAXF`.
+
+### Current State (End of Session)
+- Workflow `gfJm4JUoiUi7zZgaB2ob0` is **active**.
+- 19 nodes total.
+- Excel ingest works with new no-empty-rows format.
+- Upsert creates leads correctly and revives archived leads.
+- Phone number is optional in upload file.
+- Both new and overwritten Drive files trigger the workflow.
+- Double message issue resolved via Kommo "separar chat" (manual fix in UI).
+- AI Agent now explicitly mentions balance amount in conversational replies when lead is unpaid.
