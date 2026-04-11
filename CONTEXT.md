@@ -21,8 +21,8 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 - n8n Webhook Endpoint (ingest): `https://n8n.srv1388533.hstgr.cloud/webhook/kommo-cobranza`
 - n8n Webhook Endpoint (chat): `https://n8n.srv1388533.hstgr.cloud/webhook/kommo`
 - n8n Webhook Endpoint (drive debug): `https://n8n.srv1388533.hstgr.cloud/webhook/codex-drive-debug-39516d57`
-- Google Drive watched folder: `pruebakommo`
-- Google Drive folder id: `1QFbTelTwH9M_Sl-1F17KkiTgv9CqGl2`
+- Google Drive watched folder (current): `1VDqeluDYkR6PdJvH65j_DEHoK3bTlAXF`
+- Google Drive watched folder (legacy/deprecated): `1QFbTelTwH9M_Sl-1F17KkiTgv9CqGl2`
 - Google Drive event: `fileCreated`
 - Google Drive polling: every minute
 
@@ -216,7 +216,7 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 
 ## Credential Locations
 - `N8N_API_KEY` is stored in `.env` locally. Not committed.
-- Live Google Drive access in n8n uses credential `Google Drive account 2`.
+- Live Google Drive access in n8n now uses Service Account credential `Google Service Account account` (id `L6ly13wxjLb7k0cC`).
 - Live OpenAI access in n8n uses credential `OpenAIconn`.
 - **Kommo bearer token is embedded directly inside Code nodes:**
   - `Upsert Lead+Contacto (Code)`, `Reminder Engine (Code)`, `Detectar Cobranza Lead`, `Cobranza OCR + Abono`, `Enviar Mensaje Cobranza (Code)`
@@ -387,3 +387,54 @@ If these tab names do not exist exactly, Google Sheets API calls will fail with 
   2. Cobranza question response.
   3. `HistoricoMovimientos` no-duplicate behavior across consecutive runs.
   4. `STATUS_PAGO` conditional colors in Sheets.
+
+## Verified Update (April 10, 2026)
+
+### Scope Worked Today
+- Main workflow reviewed and patched multiple times: `gfJm4JUoiUi7zZgaB2ob0` (`Kommo Cuentas por Cobrar`).
+- User-reported issue: bot was replying twice to a single inbound WhatsApp message.
+
+### Drive + Service Account State (Current)
+- Drive trigger folder currently used by ingest flow: `1VDqeluDYkR6PdJvH65j_DEHoK3bTlAXF`.
+- Trigger mode remains `fileCreated`.
+- Google auth for Drive nodes was migrated from user OAuth to Service Account credential:
+  - Name: `Google Service Account account`
+  - Credential id: `L6ly13wxjLb7k0cC`
+- This was done to reduce disconnections/re-auth issues from OAuth user sessions.
+
+### What Was Confirmed From Live Executions
+- For inbound chat tests (examples: `Hola 2`, `Como esta tu gatito?`, `Hola`), n8n receives a single `message[add]` event per user message.
+- The extra executions near each chat are mostly non-chat webhook events (`leads/contacts updates`) and are skipped with `skipped_no_lead`.
+- Relevant execution samples:
+  - `25735` (`Hola 2`)
+  - `25740` (`Como esta tu gatito?`)
+  - `25752` (`Hola` at ~3:11 pm)
+  - `25758` (`Hola` at ~3:20 pm)
+
+### Root Cause Identified (Current)
+- Duplicate output is happening in Kommo outbound processing, not because n8n receives the same incoming message twice.
+- Evidence:
+  - For one inbound event, Kommo generates 2 `outgoing_chat_message` events in the same second for the same lead (`60069444`).
+  - A controlled direct API call to `POST /api/v2/salesbot/run` with bot `38308` increased outgoing count by `+2`.
+- Therefore, current duplication source is tied to Salesbot `38308` behavior/config in Kommo.
+
+### Changes Applied Today In n8n
+- Temporary experiments were made in `Enviar Mensaje Cobranza (Code)` to test single-send alternatives.
+- Attempted `PATCH /api/v4/chats/templates` path was implemented and tested, but Kommo returned validation `400` due to payload schema mismatch.
+- Workflow was reverted to stable current send path:
+  - update field `Respuesta IA` (`3281424`)
+  - run `POST /api/v2/salesbot/run` with bot `38308`
+  - mode back to `lead_field_plus_salesbot_run`
+- Final workflow state after revert is active and stable (updated around `2026-04-10T21:26:03Z`).
+
+### API/Platform Constraints Found
+- Salesbot configuration endpoints are not editable via current public API token (`/api/v2/salesbot*` returns `403 This is a private API`).
+- Because of this, the duplicate-send fix must be done in Kommo UI automation/bot configuration.
+
+### Current Blocking Problem
+- Bot still sends double messages in production chat because Salesbot `38308` currently emits two outbound messages per run.
+
+### Next Required Action (Kommo UI)
+- Open the Salesbot/automation configuration that sends `{{lead.cf.3281424}}`.
+- Leave only one outbound send action/branch for that trigger.
+- Re-test with one inbound `Hola` and verify only one outbound message event is created.
