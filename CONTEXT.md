@@ -440,6 +440,45 @@ If these tab names do not exist exactly, Google Sheets API calls will fail with 
 - Leave only one outbound send action/branch for that trigger.
 - Re-test with one inbound `Hola` and verify only one outbound message event is created.
 
+## Verified Update (April 11, 2026)
+
+### Current Flow State (Reminder + Stage Transitions)
+- Live workflow remains `gfJm4JUoiUi7zZgaB2ob0`.
+- Current transition order in `Reminder Engine (Code)` is:
+  1. If lead is in `revisar pago` and `Status pago = Pagado` -> move to `pagado`.
+  2. If lead is in `revisar pago` and `Status pago = Abonado` -> move to `abono`.
+  3. If lead is in `revisar pago` and `Status pago = No Pagado` -> move to `No pagado`.
+  4. Date-based transitions (`deadline`, `deadline-abono`, `5/10/15 atrasado`) apply on subsequent runs for leads already in those intermediate stages.
+- This means `revisar pago -> no pagado -> deadline` does not chain in one cron run; it happens across runs.
+- Same for `revisar pago -> abono -> deadline-abono`.
+
+### Ingest Validation (Headers in Row 1)
+- User test file with headers in first row is parsed correctly.
+- Execution `25983` (around 18:03 local) processed:
+  - `Leer Excel`: 5 rows
+  - `Limpiar Datos`: 5 rows
+  - `Upsert Lead+Contacto`: 5 rows
+- So the parser is compatible with files that start directly at row 1 headers.
+
+### Why User Saw Only 2 Leads
+- The 5 test records were present, but split by stage:
+  - some in `deadline`
+  - others in `cerrada/logrado (142)`
+- Visibility issue was due to stage filtering in Kommo UI, not missing ingestion.
+
+### API Deletion Limitation (Kommo)
+- Deleting leads via API is blocked in current account/token context:
+  - `DELETE /api/v4/leads/{id}` -> `405 Method Not Allowed`
+  - bulk delete attempts also blocked.
+- Operational implication: hard delete must be done from Kommo UI (manual delete / trash flow), not from current API automation.
+
+### Test Data File Created
+- New file generated for stage testing with unique docs/phones and `COD VEN` values:
+  - `DEMO_Cobranza_2026-04-10_Etapas_Unicas.xlsx`
+- Includes records designed to test:
+  - `recordatorio 5 dias`, `deadline`, `5 dias atrasado`, `10 dias atrasado`, `15 dias atrasado`
+  - plus prepared cases for `No pagado`, `deadline - abono`, and `pagado` via `revisar pago` decision path.
+
 ---
 
 ## Verified Update (April 10, 2026 — Session 2)
