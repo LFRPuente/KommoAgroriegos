@@ -1,0 +1,829 @@
+{
+    "updatedAt":  "2026-04-11T06:20:23.136Z",
+    "createdAt":  "2026-03-30T23:22:58.866Z",
+    "id":  "HW1MLmCmpwP6BmYl",
+    "name":  "Kommo Cobranzas - Reporte Excel Diario",
+    "description":  null,
+    "active":  true,
+    "isArchived":  false,
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "rule":  {
+                                                      "interval":  [
+                                                                       {
+                                                                           "field":  "hours",
+                                                                           "hoursInterval":  24,
+                                                                           "triggerAtHour":  8
+                                                                       }
+                                                                   ]
+                                                  }
+                                     },
+                      "id":  "cron-cobros-01",
+                      "name":  "Cron Diario Cobros 08:00",
+                      "type":  "n8n-nodes-base.scheduleTrigger",
+                      "typeVersion":  1,
+                      "position":  [
+                                       240,
+                                       304
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "\nconst CFG = {\"baseUrl\":\"https://agroriegoscorp.kommo.com\",\"token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjEyNjBhODkxNjZlMWZiNTI1MGVkZTFlNzVhY2ZhYjY3NWUxMjIyYzBmNjhlZjk5YTkxODhlNzRlODJiODVjYmYxMTY1ZTcwMDBiYmQ3NzliIn0.eyJhdWQiOiJkNGZjYmE0MS03NTM1LTQzOWYtOTk5Yy00YjZlNzA3NGUzMzIiLCJqdGkiOiIxMjYwYTg5MTY2ZTFmYjUyNTBlZGUxZTc1YWNmYWI2NzVlMTIyMmMwZjY4ZWY5OWE5MTg4ZTc0ZTgyYjg1Y2JmMTE2NWU3MDAwYmJkNzc5YiIsImlhdCI6MTc3NDM5MDcwOSwibmJmIjoxNzc0MzkwNzA5LCJleHAiOjE5MDY0MTYwMDAsInN1YiI6IjE1MDA0MDE5IiwiZ3JhbnRfdHlwZSI6IiIsImFjY291bnRfaWQiOjM2MjQ4Nzg3LCJiYXNlX2RvbWFpbiI6ImtvbW1vLmNvbSIsInZlcnNpb24iOjIsInNjb3BlcyI6WyJwdXNoX25vdGlmaWNhdGlvbnMiLCJmaWxlcyIsImNybSIsImZpbGVzX2RlbGV0ZSIsIm5vdGlmaWNhdGlvbnMiXSwiaGFzaF91dWlkIjoiZTkwNTZiMDUtMjUzNi00NWM4LTkyYjgtNmM1ZjhkNmZhODc0IiwiYXBpX2RvbWFpbiI6ImFwaS1jLmtvbW1vLmNvbSJ9.TRv4MRF9eVCbNJW-zjYzX4BTOUQ7p2AuM7DZx97UQyYdL81itbaILIro2nhS1rxqHXa-k3FUUtL48qK3FnZi3O9uz0jJuDeeqH2RdKNkCviTO7t5ggnVqePntPFxS5BXmlVxDpRTgHHvywJYgWBnxx92D7YJzVsubScTUbT5AY-6qPKr9hMfpQnaK6BeEZUQIFIW_vUeo5TSKN9Ngc9bpCXtWEiA9OjMVapLJXM0aw1IvyrIkr38fod26Ef9dxGrm9hyrVNS3amGNcpG9IrMEyo3d_ZcG5HQAnQ1bw2_avXhEFY0QcD0r5UmL_9uqx_pvHCCxLbVJxwDfnTO3IZDZA\",\"pipelineId\":13403731,\"tag\":\"cobranza_n8n_excel\",\"fieldIds\":{\"documento\":3272952,\"telefono\":3281414,\"fecha_venc_text\":3281430,\"saldo_pendiente\":3272956,\"pago_realizado\":3281416,\"razon_social\":3281418,\"fecha_abono\":3293960,\"status_pago\":3281432},\"statusPagoEnums\":{\"pagado\":8030168,\"abonado\":8030170,\"no_pagado\":8030172}};\n\nfunction fieldVal(lead, fieldId) {\n  const arr = Array.isArray(lead.custom_fields_values) ? lead.custom_fields_values : [];\n  const hit = arr.find((x) =\u003e Number(x.field_id) === Number(fieldId));\n  if (!hit || !Array.isArray(hit.values) || hit.values.length === 0) return \u0027\u0027;\n  const v = hit.values[0].value;\n  return v === null || v === undefined ? \u0027\u0027 : String(v);\n}\n\nfunction fieldEnumId(lead, fieldId) {\n  const arr = Array.isArray(lead.custom_fields_values) ? lead.custom_fields_values : [];\n  const hit = arr.find((x) =\u003e Number(x.field_id) === Number(fieldId));\n  if (!hit || !Array.isArray(hit.values) || hit.values.length === 0) return 0;\n  return Number(hit.values[0].enum_id || 0);\n}\n\nfunction readStatusPago(lead) {\n  const enumId = fieldEnumId(lead, CFG.fieldIds.status_pago);\n  if (enumId === CFG.statusPagoEnums.pagado) return \u0027Pagado\u0027;\n  if (enumId === CFG.statusPagoEnums.abonado) return \u0027Abonado\u0027;\n  if (enumId === CFG.statusPagoEnums.no_pagado) return \u0027No Pagado\u0027;\n  return \u0027\u0027;\n}\n\nasync function req(method, path) {\n  return await this.helpers.httpRequest({\n    method,\n    url: CFG.baseUrl + path,\n    headers: { Authorization: \u0027Bearer \u0027 + CFG.token },\n    json: true,\n    returnFullResponse: true,\n    ignoreHttpStatusErrors: true,\n  });\n}\n\nconst leads = [];\nfor (let page = 1; page \u003c= 100; page++) {\n  const res = await req(\u0027GET\u0027, \u0027/api/v4/leads?limit=250\u0026page=\u0027 + page + \u0027\u0026with=custom_fields_values,tags\u0027);\n  if (res.statusCode \u003e= 400) break;\n  const chunk = res.body?._embedded?.leads || [];\n  if (!chunk.length) break;\n  leads.push(...chunk);\n  if (!res.body?._links?.next?.href) break;\n}\n\nconst rows = [];\nfor (const lead of leads) {\n  const tags = (lead._embedded?.tags || []).map(t =\u003e String(t.name || \u0027\u0027).toLowerCase().trim());\n  if (!tags.includes(CFG.tag.toLowerCase())) continue;\n  if (Number(lead.pipeline_id) !== Number(CFG.pipelineId)) continue;\n\n  const pagoAcumulado = Number(fieldVal(lead, CFG.fieldIds.pago_realizado) || 0);\n  if (!(pagoAcumulado \u003e 0)) continue;\n\n  const saldoPendiente = Number(fieldVal(lead, CFG.fieldIds.saldo_pendiente) || 0);\n  const saldoOriginal = pagoAcumulado + saldoPendiente;\n\n  rows.push({\n    DOCUMENTO: fieldVal(lead, CFG.fieldIds.documento),\n    RAZON_SOCIAL: fieldVal(lead, CFG.fieldIds.razon_social),\n    TELEFONO: fieldVal(lead, CFG.fieldIds.telefono),\n    FECHA_VENCIMIENTO: fieldVal(lead, CFG.fieldIds.fecha_venc_text),\n    SALDO_ORIGINAL: saldoOriginal,\n    PAGO_ACUMULADO: pagoAcumulado,\n    SALDO_PENDIENTE: saldoPendiente,\n    FECHA_ULTIMO_ABONO: (() =\u003e { const ts = fieldVal(lead, CFG.fieldIds.fecha_abono); if (!ts) return \u0027\u0027; const n = Number(ts); if (!n) return ts; const d = new Date(n * 1000); return d.toLocaleDateString(\u0027es-MX\u0027, { day: \u00272-digit\u0027, month: \u00272-digit\u0027, year: \u0027numeric\u0027 }); })(),\n    STATUS_PAGO: readStatusPago(lead),\n  });\n}\n\nrows.sort((a, b) =\u003e String(a.DOCUMENTO).localeCompare(String(b.DOCUMENTO)));\n\nreturn rows.map(r =\u003e ({ json: r }));\n"
+                                     },
+                      "id":  "code-cobros-01",
+                      "name":  "Generar Filas Cobros (Code)",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       480,
+                                       304
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const rows = $input.all().map(i =\u003e i.json);\nreturn rows.map(r =\u003e ({ json: {\n  \u0027Documento / Factura\u0027: r.DOCUMENTO,\n  \u0027Razon Social\u0027:        r.RAZON_SOCIAL,\n  \u0027Telefono\u0027:            r.TELEFONO,\n  \u0027Fecha Vencimiento\u0027:   r.FECHA_VENCIMIENTO,\n  \u0027Saldo Original\u0027:      r.SALDO_ORIGINAL,\n  \u0027Pago Acumulado\u0027:      r.PAGO_ACUMULADO,\n  \u0027Saldo Pendiente\u0027:     r.SALDO_PENDIENTE,\n  \u0027Fecha Ultimo Abono\u0027:  r.FECHA_ULTIMO_ABONO,\n  \u0027Estatus Pago\u0027:        r.STATUS_PAGO,\n}}));"
+                                     },
+                      "id":  "code-rename-01",
+                      "name":  "Renombrar Columnas",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       640,
+                                       304
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA/values/EstadoActual!A:K",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "googleApi",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "sheet-read-estado-001",
+                      "name":  "Sheets Leer EstadoActual",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4,
+                      "position":  [
+                                       800,
+                                       304
+                                   ],
+                      "credentials":  {
+                                          "googleApi":  {
+                                                            "id":  "L6ly13wxjLb7k0cC",
+                                                            "name":  "Google Service Account account"
+                                                        }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA/values/HistoricoMovimientos!A:K",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "googleApi",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "sheet-read-hist-001",
+                      "name":  "Sheets Leer HistoricoMovimientos",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4,
+                      "position":  [
+                                       960,
+                                       304
+                                   ],
+                      "credentials":  {
+                                          "googleApi":  {
+                                                            "id":  "L6ly13wxjLb7k0cC",
+                                                            "name":  "Google Service Account account"
+                                                        }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const inputRows = $items(\u0027Renombrar Columnas\u0027, 0, 0).map(i =\u003e i.json || {});\nconst estadoSheetRaw = $items(\u0027Sheets Leer EstadoActual\u0027, 0, 0)[0]?.json?.values;\nconst estadoSheetValues = Array.isArray(estadoSheetRaw) ? estadoSheetRaw : [];\nconst historicoSheetValues = Array.isArray($json.values) ? $json.values : [];\n\nfunction toNum(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }\nfunction to2(v){ return Number(toNum(v).toFixed(2)); }\nfunction nowIso(){ return new Date().toISOString(); }\nfunction pick(r, keys){ for (const k of keys){ if (r[k] !== undefined \u0026\u0026 r[k] !== null) return r[k]; } return \u0027\u0027; }\n\nconst headerHistorico = [\u0027TIMESTAMP\u0027,\u0027DOCUMENTO\u0027,\u0027RAZON_SOCIAL\u0027,\u0027TELEFONO\u0027,\u0027SALDO_ORIGINAL\u0027,\u0027PAGO_ACUMULADO\u0027,\u0027SALDO_PENDIENTE\u0027,\u0027FECHA_ULTIMO_ABONO\u0027,\u0027STATUS_PAGO\u0027,\u0027FUENTE\u0027,\u0027LEAD_ID\u0027];\n\n// Build existing EstadoActual rows by DOCUMENTO (col 0), skip header\nconst existingByDoc = {};\nconst mergedRows = [];\nif (estadoSheetValues.length \u003e 0) {\n  const firstCell = String(estadoSheetValues[0][0] || \u0027\u0027).trim().toUpperCase();\n  const startIdx = (firstCell === \u0027DOCUMENTO\u0027 || firstCell === \u0027DOCUMENTO / FACTURA\u0027) ? 1 : 0;\n  for (let i = startIdx; i \u003c estadoSheetValues.length; i++) {\n    const row = estadoSheetValues[i] || [];\n    const doc = String(row[0] || \u0027\u0027).trim();\n    if (!doc) continue;\n    existingByDoc[doc] = mergedRows.length;\n    mergedRows.push([...row]);\n  }\n}\n\n// Historico dedup: last known signature per DOCUMENTO\nconst prevSigByDoc = {};\nif (historicoSheetValues.length \u003e 0) {\n  const start = String(historicoSheetValues[0][0] || \u0027\u0027).toUpperCase() === \u0027TIMESTAMP\u0027 ? 1 : 0;\n  for (let i = start; i \u003c historicoSheetValues.length; i++) {\n    const row = historicoSheetValues[i] || [];\n    const doc = String(row[1] || \u0027\u0027).trim();\n    if (!doc) continue;\n    const sig = [to2(row[5]), to2(row[6]), String(row[7] || \u0027\u0027).trim(), String(row[8] || \u0027\u0027).trim()].join(\u0027|\u0027);\n    prevSigByDoc[doc] = sig;\n  }\n}\n\nconst historicoRows = [];\n\nfor (const r of inputRows) {\n  const documento = String(pick(r, [\u0027DOCUMENTO\u0027, \u0027Documento / Factura\u0027])).trim();\n  if (!documento) continue;\n\n  const razon = String(pick(r, [\u0027RAZON_SOCIAL\u0027, \u0027Razon Social\u0027])).trim();\n  const telefono = String(pick(r, [\u0027TELEFONO\u0027, \u0027Telefono\u0027])).trim();\n  const fechaV = String(pick(r, [\u0027FECHA_VENCIMIENTO\u0027, \u0027Fecha Vencimiento\u0027])).trim();\n  const saldoOriginal = to2(pick(r, [\u0027SALDO_ORIGINAL\u0027, \u0027Saldo Original\u0027]));\n  const pagoAc = to2(pick(r, [\u0027PAGO_ACUMULADO\u0027, \u0027Pago Acumulado\u0027]));\n  const saldoPend = to2(pick(r, [\u0027SALDO_PENDIENTE\u0027, \u0027Saldo Pendiente\u0027]));\n  const fechaAb = String(pick(r, [\u0027FECHA_ULTIMO_ABONO\u0027, \u0027Fecha Ultimo Abono\u0027])).trim();\n  const statusPago = String(pick(r, [\u0027STATUS_PAGO\u0027, \u0027Estatus Pago\u0027]) || (saldoPend \u003c= 0 ? \u0027Pagado\u0027 : (pagoAc \u003e 0 ? \u0027Abonado\u0027 : \u0027No Pagado\u0027))).trim();\n  const fuente = \u0027reporte_cobros\u0027;\n  const leadId = String(pick(r, [\u0027LEAD_ID\u0027, \u0027Lead ID\u0027])).trim();\n\n  const newRow = [documento, razon, telefono, fechaV, saldoOriginal, pagoAc, saldoPend, fechaAb, statusPago, fuente, leadId];\n\n  if (existingByDoc[documento] !== undefined) {\n    mergedRows[existingByDoc[documento]] = newRow;\n  } else {\n    existingByDoc[documento] = mergedRows.length;\n    mergedRows.push(newRow);\n  }\n\n  const newSig = [pagoAc, saldoPend, fechaAb, statusPago].join(\u0027|\u0027);\n  const prevSig = String(prevSigByDoc[documento] || \u0027\u0027);\n  if (newSig !== prevSig) {\n    historicoRows.push([nowIso(), documento, razon, telefono, saldoOriginal, pagoAc, saldoPend, fechaAb, statusPago, fuente, leadId]);\n  }\n}\n\nconst estadoValues = mergedRows.length ? mergedRows : [[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]];\nif (historicoSheetValues.length === 0) historicoRows.unshift(headerHistorico);\n\nreturn [{ json: {\n  estadoValues,\n  estadoCount: mergedRows.length,\n  historicoValues: historicoRows,\n  historicoCount: historicoRows.length,\n} }];"
+                                     },
+                      "id":  "sheet-prep-report-001",
+                      "name":  "Preparar Sheets Estado+Historico (Code)",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1160,
+                                       304
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "PUT",
+                                         "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA/values/EstadoActual!A2:K?valueInputOption=USER_ENTERED",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "googleApi",
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={{ { majorDimension: \"ROWS\", values: $json.estadoValues } }}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "sheet-write-estado-001",
+                      "name":  "Sheets Escribir EstadoActual",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4,
+                      "position":  [
+                                       1392,
+                                       240
+                                   ],
+                      "credentials":  {
+                                          "googleApi":  {
+                                                            "id":  "L6ly13wxjLb7k0cC",
+                                                            "name":  "Google Service Account account"
+                                                        }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "conditions":  {
+                                                            "options":  {
+                                                                            "caseSensitive":  true,
+                                                                            "leftValue":  "",
+                                                                            "typeValidation":  "strict",
+                                                                            "version":  2
+                                                                        },
+                                                            "conditions":  [
+                                                                               {
+                                                                                   "id":  "hist-count-gt-0",
+                                                                                   "leftValue":  "={{ $json.historicoCount }}",
+                                                                                   "rightValue":  0,
+                                                                                   "operator":  {
+                                                                                                    "type":  "number",
+                                                                                                    "operation":  "gt"
+                                                                                                }
+                                                                               }
+                                                                           ],
+                                                            "combinator":  "and"
+                                                        },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "sheet-if-hist-report-001",
+                      "name":  "Historico Tiene Cambios?",
+                      "type":  "n8n-nodes-base.if",
+                      "typeVersion":  2,
+                      "position":  [
+                                       1392,
+                                       400
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA/values/HistoricoMovimientos!A:K:append?valueInputOption=USER_ENTERED\u0026insertDataOption=INSERT_ROWS",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "googleApi",
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={{ { majorDimension: \"ROWS\", values: $json.historicoValues } }}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "sheet-append-hist-report-001",
+                      "name":  "Sheets Append HistoricoMovimientos",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4,
+                      "position":  [
+                                       1616,
+                                       400
+                                   ],
+                      "credentials":  {
+                                          "googleApi":  {
+                                                            "id":  "L6ly13wxjLb7k0cC",
+                                                            "name":  "Google Service Account account"
+                                                        }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA?fields=sheets.properties(sheetId,title)",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "googleApi",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "sheet-meta-tabs-001",
+                      "name":  "Sheets Metadata Tabs",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4,
+                      "position":  [
+                                       1616,
+                                       240
+                                   ],
+                      "credentials":  {
+                                          "googleApi":  {
+                                                            "id":  "L6ly13wxjLb7k0cC",
+                                                            "name":  "Google Service Account account"
+                                                        }
+                                      }
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA:batchUpdate",
+                                         "authentication":  "predefinedCredentialType",
+                                         "nodeCredentialType":  "googleApi",
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={{ { requests: (() =\u003e { const sheets = $json.sheets || []; const wanted = [\"EstadoActual\",\"HistoricoMovimientos\"]; const req = []; for (const title of wanted) { const sh = sheets.find(s =\u003e s.properties \u0026\u0026 s.properties.title === title); if (!sh) continue; const id = sh.properties.sheetId; req.push({ repeatCell: { range: { sheetId: id, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: 11 }, cell: { userEnteredFormat: { backgroundColor: { red: 1, green: 1, blue: 1 }, textFormat: { foregroundColor: { red: 0, green: 0, blue: 0 }, bold: false } } }, fields: \"userEnteredFormat(backgroundColor,textFormat)\" } }); req.push({ repeatCell: { range: { sheetId: id, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: 11 }, cell: { userEnteredFormat: { backgroundColor: { red: 0.13, green: 0.55, blue: 0.13 }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 } } } }, fields: \"userEnteredFormat(backgroundColor,textFormat)\" } }); req.push({ updateSheetProperties: { properties: { sheetId: id, gridProperties: { frozenRowCount: 1 } }, fields: \"gridProperties.frozenRowCount\" } }); req.push({ setBasicFilter: { filter: { range: { sheetId: id, startRowIndex: 0, startColumnIndex: 0, endColumnIndex: 11 } } } }); } return req; })() } }}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "sheet-format-001",
+                      "name":  "Sheets Formato Headers+Auto",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4,
+                      "position":  [
+                                       1840,
+                                       240
+                                   ],
+                      "credentials":  {
+                                          "googleApi":  {
+                                                            "id":  "L6ly13wxjLb7k0cC",
+                                                            "name":  "Google Service Account account"
+                                                        }
+                                      }
+                  }
+              ],
+    "connections":  {
+                        "Cron Diario Cobros 08:00":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Generar Filas Cobros (Code)",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Generar Filas Cobros (Code)":  {
+                                                            "main":  [
+                                                                         [
+                                                                             {
+                                                                                 "node":  "Renombrar Columnas",
+                                                                                 "type":  "main",
+                                                                                 "index":  0
+                                                                             }
+                                                                         ]
+                                                                     ]
+                                                        },
+                        "Renombrar Columnas":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Sheets Leer EstadoActual",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Sheets Leer EstadoActual":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Sheets Leer HistoricoMovimientos",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Sheets Leer HistoricoMovimientos":  {
+                                                                 "main":  [
+                                                                              [
+                                                                                  {
+                                                                                      "node":  "Preparar Sheets Estado+Historico (Code)",
+                                                                                      "type":  "main",
+                                                                                      "index":  0
+                                                                                  }
+                                                                              ]
+                                                                          ]
+                                                             },
+                        "Preparar Sheets Estado+Historico (Code)":  {
+                                                                        "main":  [
+                                                                                     [
+                                                                                         {
+                                                                                             "node":  "Sheets Escribir EstadoActual",
+                                                                                             "type":  "main",
+                                                                                             "index":  0
+                                                                                         },
+                                                                                         {
+                                                                                             "node":  "Historico Tiene Cambios?",
+                                                                                             "type":  "main",
+                                                                                             "index":  0
+                                                                                         }
+                                                                                     ]
+                                                                                 ]
+                                                                    },
+                        "Sheets Escribir EstadoActual":  {
+                                                             "main":  [
+                                                                          [
+                                                                              {
+                                                                                  "node":  "Sheets Metadata Tabs",
+                                                                                  "type":  "main",
+                                                                                  "index":  0
+                                                                              }
+                                                                          ]
+                                                                      ]
+                                                         },
+                        "Historico Tiene Cambios?":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Sheets Append HistoricoMovimientos",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ],
+                                                                      [
+
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Sheets Metadata Tabs":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Sheets Formato Headers+Auto",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 }
+                    },
+    "settings":  {
+                     "callerPolicy":  "workflowsFromSameOwner",
+                     "availableInMCP":  false
+                 },
+    "staticData":  {
+                       "node:Cron Diario Cobros 08:00":  {
+                                                             "recurrenceRules":  [
+
+                                                                                 ]
+                                                         }
+                   },
+    "meta":  null,
+    "pinData":  {
+
+                },
+    "versionId":  "0cd14e4f-dbea-4833-bf21-cf5831476607",
+    "activeVersionId":  "0cd14e4f-dbea-4833-bf21-cf5831476607",
+    "versionCounter":  174,
+    "triggerCount":  1,
+    "shared":  [
+                   {
+                       "updatedAt":  "2026-03-30T23:22:58.868Z",
+                       "createdAt":  "2026-03-30T23:22:58.868Z",
+                       "role":  "workflow:owner",
+                       "workflowId":  "HW1MLmCmpwP6BmYl",
+                       "projectId":  "r4oqB6LLZI9aqq9A",
+                       "project":  {
+                                       "updatedAt":  "2026-02-17T01:18:53.980Z",
+                                       "createdAt":  "2026-02-17T01:16:43.638Z",
+                                       "id":  "r4oqB6LLZI9aqq9A",
+                                       "name":  "Luis Puente \u003cluisfrpuente@gmail.com\u003e",
+                                       "type":  "personal",
+                                       "icon":  null,
+                                       "description":  null,
+                                       "creatorId":  "97ea2654-fe8a-429f-8016-bc837138bdd0",
+                                       "projectRelations":  [
+                                                                {
+                                                                    "updatedAt":  "2026-02-17T01:16:43.639Z",
+                                                                    "createdAt":  "2026-02-17T01:16:43.639Z",
+                                                                    "userId":  "97ea2654-fe8a-429f-8016-bc837138bdd0",
+                                                                    "projectId":  "r4oqB6LLZI9aqq9A",
+                                                                    "user":  {
+                                                                                 "updatedAt":  "2026-04-13T22:04:16.000Z",
+                                                                                 "createdAt":  "2026-02-17T01:16:43.320Z",
+                                                                                 "id":  "97ea2654-fe8a-429f-8016-bc837138bdd0",
+                                                                                 "email":  "luisfrpuente@gmail.com",
+                                                                                 "firstName":  "Luis",
+                                                                                 "lastName":  "Puente",
+                                                                                 "personalizationAnswers":  {
+                                                                                                                "version":  "v4",
+                                                                                                                "personalization_survey_submitted_at":  "2026-02-17T01:19:05.438Z",
+                                                                                                                "personalization_survey_n8n_version":  "2.6.3"
+                                                                                                            },
+                                                                                 "settings":  {
+                                                                                                  "userActivated":  true,
+                                                                                                  "firstSuccessfulWorkflowId":  "TDiINdgzi1YIiIZlwX0zG",
+                                                                                                  "userActivatedAt":  1771294642757,
+                                                                                                  "easyAIWorkflowOnboarded":  true,
+                                                                                                  "npsSurvey":  {
+                                                                                                                    "responded":  true,
+                                                                                                                    "lastShownAt":  1774916246766
+                                                                                                                }
+                                                                                              },
+                                                                                 "disabled":  false,
+                                                                                 "mfaEnabled":  false,
+                                                                                 "lastActiveAt":  "2026-04-13",
+                                                                                 "isPending":  false
+                                                                             }
+                                                                }
+                                                            ]
+                                   }
+                   }
+               ],
+    "tags":  [
+
+             ],
+    "activeVersion":  {
+                          "updatedAt":  "2026-04-11T06:20:23.137Z",
+                          "createdAt":  "2026-04-11T06:20:23.137Z",
+                          "versionId":  "0cd14e4f-dbea-4833-bf21-cf5831476607",
+                          "workflowId":  "HW1MLmCmpwP6BmYl",
+                          "nodes":  [
+                                        {
+                                            "parameters":  {
+                                                               "rule":  {
+                                                                            "interval":  [
+                                                                                             {
+                                                                                                 "field":  "hours",
+                                                                                                 "hoursInterval":  24,
+                                                                                                 "triggerAtHour":  8
+                                                                                             }
+                                                                                         ]
+                                                                        }
+                                                           },
+                                            "id":  "cron-cobros-01",
+                                            "name":  "Cron Diario Cobros 08:00",
+                                            "type":  "n8n-nodes-base.scheduleTrigger",
+                                            "typeVersion":  1,
+                                            "position":  [
+                                                             240,
+                                                             304
+                                                         ]
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "jsCode":  "\nconst CFG = {\"baseUrl\":\"https://agroriegoscorp.kommo.com\",\"token\":\"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjEyNjBhODkxNjZlMWZiNTI1MGVkZTFlNzVhY2ZhYjY3NWUxMjIyYzBmNjhlZjk5YTkxODhlNzRlODJiODVjYmYxMTY1ZTcwMDBiYmQ3NzliIn0.eyJhdWQiOiJkNGZjYmE0MS03NTM1LTQzOWYtOTk5Yy00YjZlNzA3NGUzMzIiLCJqdGkiOiIxMjYwYTg5MTY2ZTFmYjUyNTBlZGUxZTc1YWNmYWI2NzVlMTIyMmMwZjY4ZWY5OWE5MTg4ZTc0ZTgyYjg1Y2JmMTE2NWU3MDAwYmJkNzc5YiIsImlhdCI6MTc3NDM5MDcwOSwibmJmIjoxNzc0MzkwNzA5LCJleHAiOjE5MDY0MTYwMDAsInN1YiI6IjE1MDA0MDE5IiwiZ3JhbnRfdHlwZSI6IiIsImFjY291bnRfaWQiOjM2MjQ4Nzg3LCJiYXNlX2RvbWFpbiI6ImtvbW1vLmNvbSIsInZlcnNpb24iOjIsInNjb3BlcyI6WyJwdXNoX25vdGlmaWNhdGlvbnMiLCJmaWxlcyIsImNybSIsImZpbGVzX2RlbGV0ZSIsIm5vdGlmaWNhdGlvbnMiXSwiaGFzaF91dWlkIjoiZTkwNTZiMDUtMjUzNi00NWM4LTkyYjgtNmM1ZjhkNmZhODc0IiwiYXBpX2RvbWFpbiI6ImFwaS1jLmtvbW1vLmNvbSJ9.TRv4MRF9eVCbNJW-zjYzX4BTOUQ7p2AuM7DZx97UQyYdL81itbaILIro2nhS1rxqHXa-k3FUUtL48qK3FnZi3O9uz0jJuDeeqH2RdKNkCviTO7t5ggnVqePntPFxS5BXmlVxDpRTgHHvywJYgWBnxx92D7YJzVsubScTUbT5AY-6qPKr9hMfpQnaK6BeEZUQIFIW_vUeo5TSKN9Ngc9bpCXtWEiA9OjMVapLJXM0aw1IvyrIkr38fod26Ef9dxGrm9hyrVNS3amGNcpG9IrMEyo3d_ZcG5HQAnQ1bw2_avXhEFY0QcD0r5UmL_9uqx_pvHCCxLbVJxwDfnTO3IZDZA\",\"pipelineId\":13403731,\"tag\":\"cobranza_n8n_excel\",\"fieldIds\":{\"documento\":3272952,\"telefono\":3281414,\"fecha_venc_text\":3281430,\"saldo_pendiente\":3272956,\"pago_realizado\":3281416,\"razon_social\":3281418,\"fecha_abono\":3293960,\"status_pago\":3281432},\"statusPagoEnums\":{\"pagado\":8030168,\"abonado\":8030170,\"no_pagado\":8030172}};\n\nfunction fieldVal(lead, fieldId) {\n  const arr = Array.isArray(lead.custom_fields_values) ? lead.custom_fields_values : [];\n  const hit = arr.find((x) =\u003e Number(x.field_id) === Number(fieldId));\n  if (!hit || !Array.isArray(hit.values) || hit.values.length === 0) return \u0027\u0027;\n  const v = hit.values[0].value;\n  return v === null || v === undefined ? \u0027\u0027 : String(v);\n}\n\nfunction fieldEnumId(lead, fieldId) {\n  const arr = Array.isArray(lead.custom_fields_values) ? lead.custom_fields_values : [];\n  const hit = arr.find((x) =\u003e Number(x.field_id) === Number(fieldId));\n  if (!hit || !Array.isArray(hit.values) || hit.values.length === 0) return 0;\n  return Number(hit.values[0].enum_id || 0);\n}\n\nfunction readStatusPago(lead) {\n  const enumId = fieldEnumId(lead, CFG.fieldIds.status_pago);\n  if (enumId === CFG.statusPagoEnums.pagado) return \u0027Pagado\u0027;\n  if (enumId === CFG.statusPagoEnums.abonado) return \u0027Abonado\u0027;\n  if (enumId === CFG.statusPagoEnums.no_pagado) return \u0027No Pagado\u0027;\n  return \u0027\u0027;\n}\n\nasync function req(method, path) {\n  return await this.helpers.httpRequest({\n    method,\n    url: CFG.baseUrl + path,\n    headers: { Authorization: \u0027Bearer \u0027 + CFG.token },\n    json: true,\n    returnFullResponse: true,\n    ignoreHttpStatusErrors: true,\n  });\n}\n\nconst leads = [];\nfor (let page = 1; page \u003c= 100; page++) {\n  const res = await req(\u0027GET\u0027, \u0027/api/v4/leads?limit=250\u0026page=\u0027 + page + \u0027\u0026with=custom_fields_values,tags\u0027);\n  if (res.statusCode \u003e= 400) break;\n  const chunk = res.body?._embedded?.leads || [];\n  if (!chunk.length) break;\n  leads.push(...chunk);\n  if (!res.body?._links?.next?.href) break;\n}\n\nconst rows = [];\nfor (const lead of leads) {\n  const tags = (lead._embedded?.tags || []).map(t =\u003e String(t.name || \u0027\u0027).toLowerCase().trim());\n  if (!tags.includes(CFG.tag.toLowerCase())) continue;\n  if (Number(lead.pipeline_id) !== Number(CFG.pipelineId)) continue;\n\n  const pagoAcumulado = Number(fieldVal(lead, CFG.fieldIds.pago_realizado) || 0);\n  if (!(pagoAcumulado \u003e 0)) continue;\n\n  const saldoPendiente = Number(fieldVal(lead, CFG.fieldIds.saldo_pendiente) || 0);\n  const saldoOriginal = pagoAcumulado + saldoPendiente;\n\n  rows.push({\n    DOCUMENTO: fieldVal(lead, CFG.fieldIds.documento),\n    RAZON_SOCIAL: fieldVal(lead, CFG.fieldIds.razon_social),\n    TELEFONO: fieldVal(lead, CFG.fieldIds.telefono),\n    FECHA_VENCIMIENTO: fieldVal(lead, CFG.fieldIds.fecha_venc_text),\n    SALDO_ORIGINAL: saldoOriginal,\n    PAGO_ACUMULADO: pagoAcumulado,\n    SALDO_PENDIENTE: saldoPendiente,\n    FECHA_ULTIMO_ABONO: (() =\u003e { const ts = fieldVal(lead, CFG.fieldIds.fecha_abono); if (!ts) return \u0027\u0027; const n = Number(ts); if (!n) return ts; const d = new Date(n * 1000); return d.toLocaleDateString(\u0027es-MX\u0027, { day: \u00272-digit\u0027, month: \u00272-digit\u0027, year: \u0027numeric\u0027 }); })(),\n    STATUS_PAGO: readStatusPago(lead),\n  });\n}\n\nrows.sort((a, b) =\u003e String(a.DOCUMENTO).localeCompare(String(b.DOCUMENTO)));\n\nreturn rows.map(r =\u003e ({ json: r }));\n"
+                                                           },
+                                            "id":  "code-cobros-01",
+                                            "name":  "Generar Filas Cobros (Code)",
+                                            "type":  "n8n-nodes-base.code",
+                                            "typeVersion":  2,
+                                            "position":  [
+                                                             480,
+                                                             304
+                                                         ]
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "jsCode":  "const rows = $input.all().map(i =\u003e i.json);\nreturn rows.map(r =\u003e ({ json: {\n  \u0027Documento / Factura\u0027: r.DOCUMENTO,\n  \u0027Razon Social\u0027:        r.RAZON_SOCIAL,\n  \u0027Telefono\u0027:            r.TELEFONO,\n  \u0027Fecha Vencimiento\u0027:   r.FECHA_VENCIMIENTO,\n  \u0027Saldo Original\u0027:      r.SALDO_ORIGINAL,\n  \u0027Pago Acumulado\u0027:      r.PAGO_ACUMULADO,\n  \u0027Saldo Pendiente\u0027:     r.SALDO_PENDIENTE,\n  \u0027Fecha Ultimo Abono\u0027:  r.FECHA_ULTIMO_ABONO,\n  \u0027Estatus Pago\u0027:        r.STATUS_PAGO,\n}}));"
+                                                           },
+                                            "id":  "code-rename-01",
+                                            "name":  "Renombrar Columnas",
+                                            "type":  "n8n-nodes-base.code",
+                                            "typeVersion":  2,
+                                            "position":  [
+                                                             640,
+                                                             304
+                                                         ]
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA/values/EstadoActual!A:K",
+                                                               "authentication":  "predefinedCredentialType",
+                                                               "nodeCredentialType":  "googleApi",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "id":  "sheet-read-estado-001",
+                                            "name":  "Sheets Leer EstadoActual",
+                                            "type":  "n8n-nodes-base.httpRequest",
+                                            "typeVersion":  4,
+                                            "position":  [
+                                                             800,
+                                                             304
+                                                         ],
+                                            "credentials":  {
+                                                                "googleApi":  {
+                                                                                  "id":  "L6ly13wxjLb7k0cC",
+                                                                                  "name":  "Google Service Account account"
+                                                                              }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA/values/HistoricoMovimientos!A:K",
+                                                               "authentication":  "predefinedCredentialType",
+                                                               "nodeCredentialType":  "googleApi",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "id":  "sheet-read-hist-001",
+                                            "name":  "Sheets Leer HistoricoMovimientos",
+                                            "type":  "n8n-nodes-base.httpRequest",
+                                            "typeVersion":  4,
+                                            "position":  [
+                                                             960,
+                                                             304
+                                                         ],
+                                            "credentials":  {
+                                                                "googleApi":  {
+                                                                                  "id":  "L6ly13wxjLb7k0cC",
+                                                                                  "name":  "Google Service Account account"
+                                                                              }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "jsCode":  "const inputRows = $items(\u0027Renombrar Columnas\u0027, 0, 0).map(i =\u003e i.json || {});\nconst estadoSheetRaw = $items(\u0027Sheets Leer EstadoActual\u0027, 0, 0)[0]?.json?.values;\nconst estadoSheetValues = Array.isArray(estadoSheetRaw) ? estadoSheetRaw : [];\nconst historicoSheetValues = Array.isArray($json.values) ? $json.values : [];\n\nfunction toNum(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }\nfunction to2(v){ return Number(toNum(v).toFixed(2)); }\nfunction nowIso(){ return new Date().toISOString(); }\nfunction pick(r, keys){ for (const k of keys){ if (r[k] !== undefined \u0026\u0026 r[k] !== null) return r[k]; } return \u0027\u0027; }\n\nconst headerHistorico = [\u0027TIMESTAMP\u0027,\u0027DOCUMENTO\u0027,\u0027RAZON_SOCIAL\u0027,\u0027TELEFONO\u0027,\u0027SALDO_ORIGINAL\u0027,\u0027PAGO_ACUMULADO\u0027,\u0027SALDO_PENDIENTE\u0027,\u0027FECHA_ULTIMO_ABONO\u0027,\u0027STATUS_PAGO\u0027,\u0027FUENTE\u0027,\u0027LEAD_ID\u0027];\n\n// Build existing EstadoActual rows by DOCUMENTO (col 0), skip header\nconst existingByDoc = {};\nconst mergedRows = [];\nif (estadoSheetValues.length \u003e 0) {\n  const firstCell = String(estadoSheetValues[0][0] || \u0027\u0027).trim().toUpperCase();\n  const startIdx = (firstCell === \u0027DOCUMENTO\u0027 || firstCell === \u0027DOCUMENTO / FACTURA\u0027) ? 1 : 0;\n  for (let i = startIdx; i \u003c estadoSheetValues.length; i++) {\n    const row = estadoSheetValues[i] || [];\n    const doc = String(row[0] || \u0027\u0027).trim();\n    if (!doc) continue;\n    existingByDoc[doc] = mergedRows.length;\n    mergedRows.push([...row]);\n  }\n}\n\n// Historico dedup: last known signature per DOCUMENTO\nconst prevSigByDoc = {};\nif (historicoSheetValues.length \u003e 0) {\n  const start = String(historicoSheetValues[0][0] || \u0027\u0027).toUpperCase() === \u0027TIMESTAMP\u0027 ? 1 : 0;\n  for (let i = start; i \u003c historicoSheetValues.length; i++) {\n    const row = historicoSheetValues[i] || [];\n    const doc = String(row[1] || \u0027\u0027).trim();\n    if (!doc) continue;\n    const sig = [to2(row[5]), to2(row[6]), String(row[7] || \u0027\u0027).trim(), String(row[8] || \u0027\u0027).trim()].join(\u0027|\u0027);\n    prevSigByDoc[doc] = sig;\n  }\n}\n\nconst historicoRows = [];\n\nfor (const r of inputRows) {\n  const documento = String(pick(r, [\u0027DOCUMENTO\u0027, \u0027Documento / Factura\u0027])).trim();\n  if (!documento) continue;\n\n  const razon = String(pick(r, [\u0027RAZON_SOCIAL\u0027, \u0027Razon Social\u0027])).trim();\n  const telefono = String(pick(r, [\u0027TELEFONO\u0027, \u0027Telefono\u0027])).trim();\n  const fechaV = String(pick(r, [\u0027FECHA_VENCIMIENTO\u0027, \u0027Fecha Vencimiento\u0027])).trim();\n  const saldoOriginal = to2(pick(r, [\u0027SALDO_ORIGINAL\u0027, \u0027Saldo Original\u0027]));\n  const pagoAc = to2(pick(r, [\u0027PAGO_ACUMULADO\u0027, \u0027Pago Acumulado\u0027]));\n  const saldoPend = to2(pick(r, [\u0027SALDO_PENDIENTE\u0027, \u0027Saldo Pendiente\u0027]));\n  const fechaAb = String(pick(r, [\u0027FECHA_ULTIMO_ABONO\u0027, \u0027Fecha Ultimo Abono\u0027])).trim();\n  const statusPago = String(pick(r, [\u0027STATUS_PAGO\u0027, \u0027Estatus Pago\u0027]) || (saldoPend \u003c= 0 ? \u0027Pagado\u0027 : (pagoAc \u003e 0 ? \u0027Abonado\u0027 : \u0027No Pagado\u0027))).trim();\n  const fuente = \u0027reporte_cobros\u0027;\n  const leadId = String(pick(r, [\u0027LEAD_ID\u0027, \u0027Lead ID\u0027])).trim();\n\n  const newRow = [documento, razon, telefono, fechaV, saldoOriginal, pagoAc, saldoPend, fechaAb, statusPago, fuente, leadId];\n\n  if (existingByDoc[documento] !== undefined) {\n    mergedRows[existingByDoc[documento]] = newRow;\n  } else {\n    existingByDoc[documento] = mergedRows.length;\n    mergedRows.push(newRow);\n  }\n\n  const newSig = [pagoAc, saldoPend, fechaAb, statusPago].join(\u0027|\u0027);\n  const prevSig = String(prevSigByDoc[documento] || \u0027\u0027);\n  if (newSig !== prevSig) {\n    historicoRows.push([nowIso(), documento, razon, telefono, saldoOriginal, pagoAc, saldoPend, fechaAb, statusPago, fuente, leadId]);\n  }\n}\n\nconst estadoValues = mergedRows.length ? mergedRows : [[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]];\nif (historicoSheetValues.length === 0) historicoRows.unshift(headerHistorico);\n\nreturn [{ json: {\n  estadoValues,\n  estadoCount: mergedRows.length,\n  historicoValues: historicoRows,\n  historicoCount: historicoRows.length,\n} }];"
+                                                           },
+                                            "id":  "sheet-prep-report-001",
+                                            "name":  "Preparar Sheets Estado+Historico (Code)",
+                                            "type":  "n8n-nodes-base.code",
+                                            "typeVersion":  2,
+                                            "position":  [
+                                                             1160,
+                                                             304
+                                                         ]
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "method":  "PUT",
+                                                               "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA/values/EstadoActual!A2:K?valueInputOption=USER_ENTERED",
+                                                               "authentication":  "predefinedCredentialType",
+                                                               "nodeCredentialType":  "googleApi",
+                                                               "sendBody":  true,
+                                                               "specifyBody":  "json",
+                                                               "jsonBody":  "={{ { majorDimension: \"ROWS\", values: $json.estadoValues } }}",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "id":  "sheet-write-estado-001",
+                                            "name":  "Sheets Escribir EstadoActual",
+                                            "type":  "n8n-nodes-base.httpRequest",
+                                            "typeVersion":  4,
+                                            "position":  [
+                                                             1392,
+                                                             240
+                                                         ],
+                                            "credentials":  {
+                                                                "googleApi":  {
+                                                                                  "id":  "L6ly13wxjLb7k0cC",
+                                                                                  "name":  "Google Service Account account"
+                                                                              }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "conditions":  {
+                                                                                  "options":  {
+                                                                                                  "caseSensitive":  true,
+                                                                                                  "leftValue":  "",
+                                                                                                  "typeValidation":  "strict",
+                                                                                                  "version":  2
+                                                                                              },
+                                                                                  "conditions":  [
+                                                                                                     {
+                                                                                                         "id":  "hist-count-gt-0",
+                                                                                                         "leftValue":  "={{ $json.historicoCount }}",
+                                                                                                         "rightValue":  0,
+                                                                                                         "operator":  {
+                                                                                                                          "type":  "number",
+                                                                                                                          "operation":  "gt"
+                                                                                                                      }
+                                                                                                     }
+                                                                                                 ],
+                                                                                  "combinator":  "and"
+                                                                              },
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "id":  "sheet-if-hist-report-001",
+                                            "name":  "Historico Tiene Cambios?",
+                                            "type":  "n8n-nodes-base.if",
+                                            "typeVersion":  2,
+                                            "position":  [
+                                                             1392,
+                                                             400
+                                                         ]
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "method":  "POST",
+                                                               "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA/values/HistoricoMovimientos!A:K:append?valueInputOption=USER_ENTERED\u0026insertDataOption=INSERT_ROWS",
+                                                               "authentication":  "predefinedCredentialType",
+                                                               "nodeCredentialType":  "googleApi",
+                                                               "sendBody":  true,
+                                                               "specifyBody":  "json",
+                                                               "jsonBody":  "={{ { majorDimension: \"ROWS\", values: $json.historicoValues } }}",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "id":  "sheet-append-hist-report-001",
+                                            "name":  "Sheets Append HistoricoMovimientos",
+                                            "type":  "n8n-nodes-base.httpRequest",
+                                            "typeVersion":  4,
+                                            "position":  [
+                                                             1616,
+                                                             400
+                                                         ],
+                                            "credentials":  {
+                                                                "googleApi":  {
+                                                                                  "id":  "L6ly13wxjLb7k0cC",
+                                                                                  "name":  "Google Service Account account"
+                                                                              }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA?fields=sheets.properties(sheetId,title)",
+                                                               "authentication":  "predefinedCredentialType",
+                                                               "nodeCredentialType":  "googleApi",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "id":  "sheet-meta-tabs-001",
+                                            "name":  "Sheets Metadata Tabs",
+                                            "type":  "n8n-nodes-base.httpRequest",
+                                            "typeVersion":  4,
+                                            "position":  [
+                                                             1616,
+                                                             240
+                                                         ],
+                                            "credentials":  {
+                                                                "googleApi":  {
+                                                                                  "id":  "L6ly13wxjLb7k0cC",
+                                                                                  "name":  "Google Service Account account"
+                                                                              }
+                                                            }
+                                        },
+                                        {
+                                            "parameters":  {
+                                                               "method":  "POST",
+                                                               "url":  "https://sheets.googleapis.com/v4/spreadsheets/1PtBp0ufcydQmNXemFV8CIHamI1-vNsgHJjg0CwxmJaA:batchUpdate",
+                                                               "authentication":  "predefinedCredentialType",
+                                                               "nodeCredentialType":  "googleApi",
+                                                               "sendBody":  true,
+                                                               "specifyBody":  "json",
+                                                               "jsonBody":  "={{ { requests: (() =\u003e { const sheets = $json.sheets || []; const wanted = [\"EstadoActual\",\"HistoricoMovimientos\"]; const req = []; for (const title of wanted) { const sh = sheets.find(s =\u003e s.properties \u0026\u0026 s.properties.title === title); if (!sh) continue; const id = sh.properties.sheetId; req.push({ repeatCell: { range: { sheetId: id, startRowIndex: 1, startColumnIndex: 0, endColumnIndex: 11 }, cell: { userEnteredFormat: { backgroundColor: { red: 1, green: 1, blue: 1 }, textFormat: { foregroundColor: { red: 0, green: 0, blue: 0 }, bold: false } } }, fields: \"userEnteredFormat(backgroundColor,textFormat)\" } }); req.push({ repeatCell: { range: { sheetId: id, startRowIndex: 0, endRowIndex: 1, startColumnIndex: 0, endColumnIndex: 11 }, cell: { userEnteredFormat: { backgroundColor: { red: 0.13, green: 0.55, blue: 0.13 }, textFormat: { bold: true, foregroundColor: { red: 1, green: 1, blue: 1 } } } }, fields: \"userEnteredFormat(backgroundColor,textFormat)\" } }); req.push({ updateSheetProperties: { properties: { sheetId: id, gridProperties: { frozenRowCount: 1 } }, fields: \"gridProperties.frozenRowCount\" } }); req.push({ setBasicFilter: { filter: { range: { sheetId: id, startRowIndex: 0, startColumnIndex: 0, endColumnIndex: 11 } } } }); } return req; })() } }}",
+                                                               "options":  {
+
+                                                                           }
+                                                           },
+                                            "id":  "sheet-format-001",
+                                            "name":  "Sheets Formato Headers+Auto",
+                                            "type":  "n8n-nodes-base.httpRequest",
+                                            "typeVersion":  4,
+                                            "position":  [
+                                                             1840,
+                                                             240
+                                                         ],
+                                            "credentials":  {
+                                                                "googleApi":  {
+                                                                                  "id":  "L6ly13wxjLb7k0cC",
+                                                                                  "name":  "Google Service Account account"
+                                                                              }
+                                                            }
+                                        }
+                                    ],
+                          "connections":  {
+                                              "Cron Diario Cobros 08:00":  {
+                                                                               "main":  [
+                                                                                            [
+                                                                                                {
+                                                                                                    "node":  "Generar Filas Cobros (Code)",
+                                                                                                    "type":  "main",
+                                                                                                    "index":  0
+                                                                                                }
+                                                                                            ]
+                                                                                        ]
+                                                                           },
+                                              "Generar Filas Cobros (Code)":  {
+                                                                                  "main":  [
+                                                                                               [
+                                                                                                   {
+                                                                                                       "node":  "Renombrar Columnas",
+                                                                                                       "type":  "main",
+                                                                                                       "index":  0
+                                                                                                   }
+                                                                                               ]
+                                                                                           ]
+                                                                              },
+                                              "Renombrar Columnas":  {
+                                                                         "main":  [
+                                                                                      [
+                                                                                          {
+                                                                                              "node":  "Sheets Leer EstadoActual",
+                                                                                              "type":  "main",
+                                                                                              "index":  0
+                                                                                          }
+                                                                                      ]
+                                                                                  ]
+                                                                     },
+                                              "Sheets Leer EstadoActual":  {
+                                                                               "main":  [
+                                                                                            [
+                                                                                                {
+                                                                                                    "node":  "Sheets Leer HistoricoMovimientos",
+                                                                                                    "type":  "main",
+                                                                                                    "index":  0
+                                                                                                }
+                                                                                            ]
+                                                                                        ]
+                                                                           },
+                                              "Sheets Leer HistoricoMovimientos":  {
+                                                                                       "main":  [
+                                                                                                    [
+                                                                                                        {
+                                                                                                            "node":  "Preparar Sheets Estado+Historico (Code)",
+                                                                                                            "type":  "main",
+                                                                                                            "index":  0
+                                                                                                        }
+                                                                                                    ]
+                                                                                                ]
+                                                                                   },
+                                              "Preparar Sheets Estado+Historico (Code)":  {
+                                                                                              "main":  [
+                                                                                                           [
+                                                                                                               {
+                                                                                                                   "node":  "Sheets Escribir EstadoActual",
+                                                                                                                   "type":  "main",
+                                                                                                                   "index":  0
+                                                                                                               },
+                                                                                                               {
+                                                                                                                   "node":  "Historico Tiene Cambios?",
+                                                                                                                   "type":  "main",
+                                                                                                                   "index":  0
+                                                                                                               }
+                                                                                                           ]
+                                                                                                       ]
+                                                                                          },
+                                              "Sheets Escribir EstadoActual":  {
+                                                                                   "main":  [
+                                                                                                [
+                                                                                                    {
+                                                                                                        "node":  "Sheets Metadata Tabs",
+                                                                                                        "type":  "main",
+                                                                                                        "index":  0
+                                                                                                    }
+                                                                                                ]
+                                                                                            ]
+                                                                               },
+                                              "Historico Tiene Cambios?":  {
+                                                                               "main":  [
+                                                                                            [
+                                                                                                {
+                                                                                                    "node":  "Sheets Append HistoricoMovimientos",
+                                                                                                    "type":  "main",
+                                                                                                    "index":  0
+                                                                                                }
+                                                                                            ],
+                                                                                            [
+
+                                                                                            ]
+                                                                                        ]
+                                                                           },
+                                              "Sheets Metadata Tabs":  {
+                                                                           "main":  [
+                                                                                        [
+                                                                                            {
+                                                                                                "node":  "Sheets Formato Headers+Auto",
+                                                                                                "type":  "main",
+                                                                                                "index":  0
+                                                                                            }
+                                                                                        ]
+                                                                                    ]
+                                                                       }
+                                          },
+                          "authors":  "Luis Puente",
+                          "name":  null,
+                          "description":  null,
+                          "autosaved":  false,
+                          "workflowPublishHistory":  [
+                                                         {
+                                                             "createdAt":  "2026-04-11T06:20:23.182Z",
+                                                             "id":  435,
+                                                             "workflowId":  "HW1MLmCmpwP6BmYl",
+                                                             "versionId":  "0cd14e4f-dbea-4833-bf21-cf5831476607",
+                                                             "event":  "activated",
+                                                             "userId":  "97ea2654-fe8a-429f-8016-bc837138bdd0"
+                                                         }
+                                                     ]
+                      }
+}
