@@ -16,6 +16,7 @@ if (!parsed) {
 }
 
 const base = $('Detectar Cobranza Lead').item.json;
+const leadId = Number(base.lead_id || 0);
 const text = String(base.message_text || '').trim();
 const hasAttachment = Boolean(base.is_image || base.cobranza_is_pdf || base.is_document || base.is_media);
 const isAudio = Boolean(base.is_audio);
@@ -27,7 +28,16 @@ const saldoPendiente = !isPaid && base.cobranza_saldo_actual != null && Number(b
 const saldoActualNumRaw = Number(base.cobranza_saldo_actual);
 const hasSaldoPendiente = Number.isFinite(saldoActualNumRaw) && saldoActualNumRaw > 0;
 const wrongRecipientBlocked = Boolean(base.cobranza_wrong_recipient_blocked);
-const ackSilenced = Boolean(base.cobranza_ack_silenced);
+const botPaused = Boolean(base.cobranza_bot_paused);
+const ACK_SILENCE_MS = 2 * 60 * 60 * 1000;
+const staticData = this.getWorkflowStaticData('global');
+if (!staticData.cobranzaAckSilenceUntilByLead || typeof staticData.cobranzaAckSilenceUntilByLead !== 'object') {
+  staticData.cobranzaAckSilenceUntilByLead = {};
+}
+const ackSilenceByLead = staticData.cobranzaAckSilenceUntilByLead;
+const nowMs = Date.now();
+const ackSilenceUntilTs = leadId > 0 ? Number(ackSilenceByLead[String(leadId)] || 0) : 0;
+const ackSilenced = leadId > 0 && Number.isFinite(ackSilenceUntilTs) && ackSilenceUntilTs > nowMs;
 const wrongRecipientRegex = /(no\s*(es|era)?\s*(mi|nuestro)\s*(saldo|deuda|cuenta|factura)|no\s*soy\s*(el|la)?\s*(titular|cliente|persona)|numero\s*equivocado|numero\s*incorrecto|contact(ar|en)\s*(a|al)\s*otro\s*numero|envi(a|e)n?\s*(el\s*)?mensaje\s*(a|al)\s*otro\s*numero|ese\s*saldo\s*no\s*es\s*mio|no\s*me\s*corresponde\s*(ese|esa)?\s*(saldo|deuda|factura)|esta\s*deuda\s*no\s*es\s*mia)/i;
 const isWrongRecipientClaim = !hasAttachment && !isAudio && wrongRecipientRegex.test(text);
 const paymentRegex = /(abon|abono|pago|pagado|pague|pagu[e?]|transfer|deposit|comprobante|recibo|spei|folio|adjunt|envi[o?]|mand[o?])/i;
@@ -93,6 +103,13 @@ if (isSticker && !isAudio) {
   needsManualReview = false;
   shouldReply = true;
   reason = reason || 'sticker';
+}
+
+if (botPaused) {
+  shouldReply = false;
+  needsManualReview = false;
+  replyText = '';
+  reason = reason || 'bot_paused_by_tag';
 }
 
 if (wrongRecipientBlocked) {
@@ -214,6 +231,19 @@ if (wrongRecipientBlocked) {
   reason = reason || "wrong_recipient_silenced";
 }
 
+if (botPaused) {
+  shouldReply = false;
+  needsManualReview = false;
+  replyText = '';
+  reason = reason || "bot_paused_by_tag";
+}
+
+if (markAckSilence && leadId > 0) {
+  ackSilenceByLead[String(leadId)] = nowMs + ACK_SILENCE_MS;
+} else if (!ackSilenced && leadId > 0 && ackSilenceByLead[String(leadId)]) {
+  delete ackSilenceByLead[String(leadId)];
+}
+
 return [{
   json: {
     ...base,
@@ -229,6 +259,8 @@ return [{
     cobranza_agent_reason: reason,
     cobranza_mark_wrong_recipient_block: Boolean(markWrongRecipientBlock),
     cobranza_mark_ack_silence: Boolean(markAckSilence),
+    cobranza_ack_silenced_runtime: Boolean(ackSilenced),
+    cobranza_ack_silence_until: (leadId > 0 && ackSilenceByLead[String(leadId)]) ? new Date(Number(ackSilenceByLead[String(leadId)])).toISOString() : "",
     cobranza_manual_review_required: Boolean(needsManualReview),
     cobranza_manual_review_reason: reason,
     cobranza_reply: !Boolean(shouldProcess) ? replyText : (base.cobranza_reply || ''),

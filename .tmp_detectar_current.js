@@ -1,4 +1,4 @@
-const CFG = {"baseUrl": "https://agroriegoscorp.kommo.com", "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjEyNjBhODkxNjZlMWZiNTI1MGVkZTFlNzVhY2ZhYjY3NWUxMjIyYzBmNjhlZjk5YTkxODhlNzRlODJiODVjYmYxMTY1ZTcwMDBiYmQ3NzliIn0.eyJhdWQiOiJkNGZjYmE0MS03NTM1LTQzOWYtOTk5Yy00YjZlNzA3NGUzMzIiLCJqdGkiOiIxMjYwYTg5MTY2ZTFmYjUyNTBlZGUxZTc1YWNmYWI2NzVlMTIyMmMwZjY4ZWY5OWE5MTg4ZTc0ZTgyYjg1Y2JmMTE2NWU3MDAwYmJkNzc5YiIsImlhdCI6MTc3NDM5MDcwOSwibmJmIjoxNzc0MzkwNzA5LCJleHAiOjE5MDY0MTYwMDAsInN1YiI6IjE1MDA0MDE5IiwiZ3JhbnRfdHlwZSI6IiIsImFjY291bnRfaWQiOjM2MjQ4Nzg3LCJiYXNlX2RvbWFpbiI6ImtvbW1vLmNvbSIsInZlcnNpb24iOjIsInNjb3BlcyI6WyJwdXNoX25vdGlmaWNhdGlvbnMiLCJmaWxlcyIsImNybSIsImZpbGVzX2RlbGV0ZSIsIm5vdGlmaWNhdGlvbnMiXSwiaGFzaF91dWlkIjoiZTkwNTZiMDUtMjUzNi00NWM4LTkyYjgtNmM1ZjhkNmZhODc0IiwiYXBpX2RvbWFpbiI6ImFwaS1jLmtvbW1vLmNvbSJ9.TRv4MRF9eVCbNJW-zjYzX4BTOUQ7p2AuM7DZx97UQyYdL81itbaILIro2nhS1rxqHXa-k3FUUtL48qK3FnZi3O9uz0jJuDeeqH2RdKNkCviTO7t5ggnVqePntPFxS5BXmlVxDpRTgHHvywJYgWBnxx92D7YJzVsubScTUbT5AY-6qPKr9hMfpQnaK6BeEZUQIFIW_vUeo5TSKN9Ngc9bpCXtWEiA9OjMVapLJXM0aw1IvyrIkr38fod26Ef9dxGrm9hyrVNS3amGNcpG9IrMEyo3d_ZcG5HQAnQ1bw2_avXhEFY0QcD0r5UmL_9uqx_pvHCCxLbVJxwDfnTO3IZDZA", "tag": "cobranza_n8n_excel", "wrongRecipientTag": "cobranza_no_contactar_titular_incorrecto", "ackSilenceTag": "cobranza_silencio_post_ack", "fieldIds": {"documento": 3272952, "telefono": 3281414, "fecha_venc_text": 3281430, "saldo_pendiente": 3272956, "pago_realizado": 3281416, "razon_social": 3281418, "fecha_venc_date": 3272954, "aviso_3d": 3282254, "aviso_2d": 3282256, "aviso_1d": 3282258, "ultimo_hash": 3281420, "ultimo_abono": 3281422}, "timezone": "America/Mexico_City", "statusIds": {"recordatorio_enviado": 103388971}, "paidStatusId": 103429439};
+const CFG = {"baseUrl": "https://agroriegoscorp.kommo.com", "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjEyNjBhODkxNjZlMWZiNTI1MGVkZTFlNzVhY2ZhYjY3NWUxMjIyYzBmNjhlZjk5YTkxODhlNzRlODJiODVjYmYxMTY1ZTcwMDBiYmQ3NzliIn0.eyJhdWQiOiJkNGZjYmE0MS03NTM1LTQzOWYtOTk5Yy00YjZlNzA3NGUzMzIiLCJqdGkiOiIxMjYwYTg5MTY2ZTFmYjUyNTBlZGUxZTc1YWNmYWI2NzVlMTIyMmMwZjY4ZWY5OWE5MTg4ZTc0ZTgyYjg1Y2JmMTE2NWU3MDAwYmJkNzc5YiIsImlhdCI6MTc3NDM5MDcwOSwibmJmIjoxNzc0MzkwNzA5LCJleHAiOjE5MDY0MTYwMDAsInN1YiI6IjE1MDA0MDE5IiwiZ3JhbnRfdHlwZSI6IiIsImFjY291bnRfaWQiOjM2MjQ4Nzg3LCJiYXNlX2RvbWFpbiI6ImtvbW1vLmNvbSIsInZlcnNpb24iOjIsInNjb3BlcyI6WyJwdXNoX25vdGlmaWNhdGlvbnMiLCJmaWxlcyIsImNybSIsImZpbGVzX2RlbGV0ZSIsIm5vdGlmaWNhdGlvbnMiXSwiaGFzaF91dWlkIjoiZTkwNTZiMDUtMjUzNi00NWM4LTkyYjgtNmM1ZjhkNmZhODc0IiwiYXBpX2RvbWFpbiI6ImFwaS1jLmtvbW1vLmNvbSJ9.TRv4MRF9eVCbNJW-zjYzX4BTOUQ7p2AuM7DZx97UQyYdL81itbaILIro2nhS1rxqHXa-k3FUUtL48qK3FnZi3O9uz0jJuDeeqH2RdKNkCviTO7t5ggnVqePntPFxS5BXmlVxDpRTgHHvywJYgWBnxx92D7YJzVsubScTUbT5AY-6qPKr9hMfpQnaK6BeEZUQIFIW_vUeo5TSKN9Ngc9bpCXtWEiA9OjMVapLJXM0aw1IvyrIkr38fod26Ef9dxGrm9hyrVNS3amGNcpG9IrMEyo3d_ZcG5HQAnQ1bw2_avXhEFY0QcD0r5UmL_9uqx_pvHCCxLbVJxwDfnTO3IZDZA", "tag": "cobranza_n8n_excel", "pauseBotTag": "cobranza_bot_pausado", "wrongRecipientTag": "cobranza_numero_incorrecto_lead", "wrongRecipientLegacyTag": "cobranza_no_contactar_titular_incorrecto", "ackSilenceTag": "cobranza_silencio_post_ack", "fieldIds": {"documento": 3272952, "telefono": 3281414, "fecha_venc_text": 3281430, "saldo_pendiente": 3272956, "pago_realizado": 3281416, "razon_social": 3281418, "fecha_venc_date": 3272954, "aviso_3d": 3282254, "aviso_2d": 3282256, "aviso_1d": 3282258, "ultimo_hash": 3281420, "ultimo_abono": 3281422}, "timezone": "America/Mexico_City", "statusIds": {"recordatorio_enviado": 103388971}, "paidStatusId": 103429439};
 
 function normalizePhone(v) {
   const digits = String(v || "").replace(/[^0-9]/g, "");
@@ -77,7 +77,9 @@ if (leadRes.statusCode >= 400) {
 const lead = leadRes.body || {};
 const tags = ((((lead._embedded || {}).tags) || [])).map((t) => String(t.name || "").toLowerCase().trim());
 const hasTag = tags.includes(String(CFG.tag).toLowerCase());
-const wrongRecipientBlocked = tags.includes(String(CFG.wrongRecipientTag || "").toLowerCase());
+const botPaused = tags.includes(String(CFG.pauseBotTag || "").toLowerCase());
+const wrongRecipientBlocked = tags.includes(String(CFG.wrongRecipientTag || "").toLowerCase())
+  || tags.includes(String(CFG.wrongRecipientLegacyTag || "").toLowerCase());
 const ackSilenced = tags.includes(String(CFG.ackSilenceTag || "").toLowerCase());
 const doc = getFieldValue(lead, CFG.fieldIds.documento);
 const isCobranza = hasTag || Boolean(String(doc).trim());
@@ -109,6 +111,7 @@ return {
     ...item,
     is_cobranza_lead: isCobranza,
     cobranza_has_tag: hasTag,
+    cobranza_bot_paused: botPaused,
     cobranza_wrong_recipient_blocked: wrongRecipientBlocked,
     cobranza_ack_silenced: ackSilenced,
     cobranza_documento: doc,
@@ -130,3 +133,4 @@ return {
     should_process_cobranza_receipt: shouldProcess,
   },
 };
+
