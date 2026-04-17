@@ -1,82 +1,55 @@
 const fs = require('fs');
-const https = require('https');
 
-const base = 'https://n8n.srv1388533.hstgr.cloud';
-const workflowId = 'gfJm4JUoiUi7zZgaB2ob0';
-const env = fs.readFileSync('.env', 'utf8');
-const keyLine = env.split(/\r?\n/).find((l) => l.startsWith('N8N_API_KEY='));
-if (!keyLine) throw new Error('N8N_API_KEY not found in .env');
-const apiKey = keyLine.slice('N8N_API_KEY='.length).trim();
+try {
+    // Leer el workflow descargado
+    const wfPath = '.tmp_wf_before_recepcion_patch.json';
+    if (!fs.existsSync(wfPath)) throw new Error('No se encontró el backup ' + wfPath);
+    let raw = fs.readFileSync(wfPath, 'utf8');
+    if (raw.charCodeAt(0) === 0xFEFF) raw = raw.slice(1); // Strip BOM
+    const wf = JSON.parse(raw);
 
-const parseCode = fs.readFileSync('.tmp_parsear_code.js', 'utf8');
-const systemMessage = fs.readFileSync('.tmp_agent_system_utf8.txt', 'utf8');
+    // ── Encontrar el nodo Limpiar Datos ──
+    const limpiarNode = wf.nodes.find(n => n.name === 'Limpiar Datos');
+    if (!limpiarNode) throw new Error('Nodo "Limpiar Datos" no encontrado');
 
-function request(method, path, body) {
-  return new Promise((resolve, reject) => {
-    const payload = body ? Buffer.from(JSON.stringify(body), 'utf8') : null;
-    const req = https.request(
-      base + path,
-      {
-        method,
-        headers: {
-          'X-N8N-API-KEY': apiKey,
-          'Content-Type': 'application/json',
-          ...(payload ? { 'Content-Length': String(payload.length) } : {}),
-        },
-        timeout: 180000,
-      },
-      (res) => {
-        const chunks = [];
-        res.on('data', (d) => chunks.push(d));
-        res.on('end', () => {
-          const raw = Buffer.concat(chunks).toString('utf8');
-          let json = {};
-          try { json = raw ? JSON.parse(raw) : {}; } catch {}
-          if (res.statusCode >= 400) {
-            return reject(new Error(`HTTP ${res.statusCode} ${method} ${path} ${raw.slice(0, 500)}`));
-          }
-          resolve(json);
-        });
-      },
-    );
-    req.on('timeout', () => req.destroy(new Error(`Timeout ${method} ${path}`)));
-    req.on('error', reject);
-    if (payload) req.write(payload);
-    req.end();
-  });
-}
+    // ── Encontrar el nodo Upsert ──
+    const upsertNode = wf.nodes.find(n => n.name.includes('Upsert'));
+    if (!upsertNode) throw new Error('Nodo "Upsert" no encontrado');
 
-async function main() {
-  const wf = await request('GET', `/api/v1/workflows/${workflowId}`);
-  for (const n of wf.nodes || []) {
-    if (n.name === 'Parsear Cobranza Agent (Code)') {
-      n.parameters.jsCode = parseCode;
+    // ── Leer el código nuevo desde archivos ──
+    const newLimpiar = fs.readFileSync('.tmp_limpiar_NEW.js', 'utf8');
+    const newUpsertFn = fs.readFileSync('.tmp_upsert_toKommoDateTime_NEW.txt', 'utf8');
+
+    // ── Aplicar código de Limpiar Datos ── (reemplazo total)
+    limpiarNode.parameters.jsCode = newLimpiar;
+
+    // ── Aplicar toKommoDateTime en Upsert ── (reemplazo parcial)
+    const oldFnSignature = 'function toKommoDateTime(value) {';
+    const oldCode = upsertNode.parameters.jsCode;
+    const fnStart = oldCode.indexOf(oldFnSignature);
+    if (fnStart === -1) throw new Error('No encontré toKommoDateTime en Upsert');
+
+    // Encontrar el cierre de la función (buscar el "}\n" al nivel correcto)
+    let braceCount = 0;
+    let fnEnd = -1;
+    for (let i = fnStart; i < oldCode.length; i++) {
+        if (oldCode[i] === '{') braceCount++;
+        if (oldCode[i] === '}') {
+            braceCount--;
+            if (braceCount === 0) {
+                fnEnd = i + 1;
+                break;
+            }
+        }
     }
-    if (n.name === 'AI Agent Cobranza') {
-      n.parameters.options = n.parameters.options || {};
-      n.parameters.options.systemMessage = systemMessage;
-    }
-  }
+    if (fnEnd === -1) throw new Error('No encontré el cierre de toKommoDateTime');
 
-  const payload = {
-    name: wf.name,
-    nodes: wf.nodes,
-    connections: wf.connections,
-    settings: {},
-  };
-  if (wf.settings && wf.settings.timezone) payload.settings.timezone = wf.settings.timezone;
-  await request('PUT', `/api/v1/workflows/${workflowId}`, payload);
+    upsertNode.parameters.jsCode = oldCode.slice(0, fnStart) + newUpsertFn + oldCode.slice(fnEnd);
 
-  const wf2 = await request('GET', `/api/v1/workflows/${workflowId}`);
-  const parser = (wf2.nodes || []).find((n) => n.name === 'Parsear Cobranza Agent (Code)');
-  const agent = (wf2.nodes || []).find((n) => n.name === 'AI Agent Cobranza');
-  const okParser = /outsideCobranzaRegex/.test((parser?.parameters?.jsCode || ''));
-  const okPrompt = /solo saluda/.test((agent?.parameters?.options?.systemMessage || ''));
-  console.log(JSON.stringify({ updated: wf2.id, active: wf2.active, parserPatched: okParser, promptPatched: okPrompt }));
+    // ── Guardar el workflow modificado ──
+    fs.writeFileSync('.tmp_wf_after_recepcion_patch.json', JSON.stringify(wf, null, 2), 'utf8');
+    console.log('OK');
+} catch (e) {
+    console.error('ERROR: ' + e.message);
+    process.exit(1);
 }
-
-main().catch((err) => {
-  console.error(String(err && err.stack ? err.stack : err));
-  process.exit(1);
-});
-

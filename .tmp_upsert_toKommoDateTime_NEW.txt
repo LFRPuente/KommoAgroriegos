@@ -1,0 +1,33 @@
+function toKommoDateTime(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  // Ya tiene formato ISO completo con hora
+  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw;
+  // Formato ISO sin hora (YYYY-MM-DD)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw + "T06:00:00+00:00";
+  // Formato DD/MM/YYYY (el formato que ahora siempre llega desde Limpiar Datos)
+  const slash = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2}|\d{4})$/);
+  if (slash) {
+    let dd = Number(slash[1]);   // ← CORRECTO: primer valor = día
+    let mm = Number(slash[2]);   // ← CORRECTO: segundo valor = mes
+    let yy = Number(slash[3]);
+    if (yy < 100) yy = yy >= 70 ? 1900 + yy : 2000 + yy;
+    if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
+      const m = String(mm).padStart(2, "0");
+      const d = String(dd).padStart(2, "0");
+      return String(yy) + '-' + m + '-' + d + 'T06:00:00+00:00';
+    }
+  }
+  // Fallback genérico
+  const d = new Date(raw);
+  if (!Number.isNaN(d.getTime())) {
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    const hh = String(d.getUTCHours()).padStart(2, "0");
+    const mm = String(d.getUTCMinutes()).padStart(2, "0");
+    const ss = String(d.getUTCSeconds()).padStart(2, "0");
+    return String(y) + '-' + m + '-' + day + 'T' + hh + ':' + mm + ':' + ss + '+00:00';
+  }
+  return "";
+}
