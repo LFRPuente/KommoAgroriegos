@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "sim:drive-upload": "node simulate_drive_upload_local.js"
+  },
   "dependencies": {
     "xlsx": "^0.18.5"
   }

@@ -1,0 +1,938 @@
+{
+  "expected_docs": 303,
+  "actual_docs": 303,
+  "correct_status": 303,
+  "missing_docs": [],
+  "unexpected_docs": [],
+  "status_mismatches_count": 0,
+  "field_mismatches_count": 303,
+  "expected_status_counts": {
+    "leads_importados": 230,
+    "fecha_limite": 25,
+    "atrasado_15d": 25,
+    "atrasado_5d": 15,
+    "recordatorio_enviado": 7,
+    "atrasado_10d": 1
+  },
+  "actual_status_counts": {
+    "leads_importados": 230,
+    "fecha_limite": 25,
+    "atrasado_15d": 25,
+    "atrasado_5d": 15,
+    "recordatorio_enviado": 7,
+    "atrasado_10d": 1
+  },
+  "status_mismatches": [],
+  "field_mismatches": [
+    {
+      "documento": "3065",
+      "lead_id": 61213892,
+      "razon_social": "AGRO ANIMAL LOS MONTOYA C.A",
+      "checks": [
+        [
+          "telefono",
+          "58412401226211",
+          "584124012262"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ],
+        [
+          "saldo_pendiente",
+          -848.11,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "2929",
+      "lead_id": 61213894,
+      "razon_social": "AGROPECUARIA Y MATERIALES DE  CONSTRUCCION LOS ANDES C.A",
+      "checks": [
+        [
+          "telefono",
+          "58416778974311",
+          "584167789743"
+        ],
+        [
+          "fecha_venc_text",
+          "27/02/2026",
+          "29/03/2026"
+        ],
+        [
+          "saldo_pendiente",
+          -493.6,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "2930",
+      "lead_id": 61213898,
+      "razon_social": "AMAYA SUAREZ INVERSIONES CRISYO C.A",
+      "checks": [
+        [
+          "telefono",
+          "58412676200711",
+          "584126762007"
+        ],
+        [
+          "fecha_venc_text",
+          "27/02/2026",
+          "29/03/2026"
+        ],
+        [
+          "saldo_pendiente",
+          -1085.18,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "3068",
+      "lead_id": 61213900,
+      "razon_social": "ARELLANO PARRA CARMEN JAVIER/FERRETODO LA FORTALEZA 2013",
+      "checks": [
+        [
+          "telefono",
+          "58416705303511",
+          "584167053035"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "2657",
+      "lead_id": 61213902,
+      "razon_social": "ARELLANO PARRA CARMEN JAVIER/FERRETODO LA FORTALEZA 2013",
+      "checks": [
+        [
+          "telefono",
+          "58416705303511",
+          "584167053035"
+        ],
+        [
+          "fecha_venc_text",
+          "09/02/2026",
+          "11/03/2026"
+        ],
+        [
+          "saldo_pendiente",
+          -154.5,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "3074",
+      "lead_id": 61213908,
+      "razon_social": "BARBARA RITA PERALTA GARCIA / FERRE AGRO DON MARTIN",
+      "checks": [
+        [
+          "telefono",
+          "58424593293711",
+          "584245932937"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3095",
+      "lead_id": 61213912,
+      "razon_social": "BARBARA RITA PERALTA GARCIA / FERRE AGRO DON MARTIN",
+      "checks": [
+        [
+          "telefono",
+          "58424593293711",
+          "584245932937"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "90000001261",
+      "lead_id": 61213920,
+      "razon_social": "BERNAVE SALAS MARQUINA / TRUPERMAX",
+      "checks": [
+        [
+          "telefono",
+          "58424577281311",
+          "584245772813"
+        ],
+        [
+          "fecha_venc_text",
+          "45780.0",
+          "03/05/2025"
+        ]
+      ]
+    },
+    {
+      "documento": "3077",
+      "lead_id": 61213928,
+      "razon_social": "CARLOS ANDRES CARDENAS RIOS FERRE AGRO CARDENAS",
+      "checks": [
+        [
+          "telefono",
+          "58424743277911",
+          "584247432779"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ],
+        [
+          "saldo_pendiente",
+          -2375.0,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "15",
+      "lead_id": 61213934,
+      "razon_social": "CARLOS ARTURO SILVA MOGOLLON/AGROFER SILVA 2015",
+      "checks": [
+        [
+          "telefono",
+          "58426473469711",
+          "584264734697"
+        ],
+        [
+          "fecha_venc_text",
+          "20/06/2025",
+          "20/07/2025"
+        ],
+        [
+          "saldo_pendiente",
+          -230.46,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "90000001396",
+      "lead_id": 61213938,
+      "razon_social": "CARLOS ARTURO SILVA MOGOLLON/AGROFER SILVA 2015",
+      "checks": [
+        [
+          "telefono",
+          "58426473469711",
+          "584264734697"
+        ],
+        [
+          "fecha_venc_text",
+          "45821.0",
+          "13/06/2025"
+        ],
+        [
+          "saldo_pendiente",
+          -299.8,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "3330",
+      "lead_id": 61213948,
+      "razon_social": "CARLOS EDUADO ARAQUE ZAPATA / FRIOVENCA ARAQUE",
+      "checks": [
+        [
+          "telefono",
+          "58416178755611",
+          "584161787556"
+        ],
+        [
+          "fecha_venc_text",
+          "46155.0",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3229",
+      "lead_id": 61213950,
+      "razon_social": "CARLOS FAGED SALAH ORTEGA (INVERSIONES AGRO HOGAR)",
+      "checks": [
+        [
+          "telefono",
+          "58416502518711",
+          "584165025187"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3235",
+      "lead_id": 61213954,
+      "razon_social": "CARMEN YURITZA PLANA \"FERRELECTRICO SOFI PLANA\"",
+      "checks": [
+        [
+          "telefono",
+          "5730222275311",
+          "573022227530"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3090",
+      "lead_id": 61213960,
+      "razon_social": "DARWIN HORACIO PARRA ESCALANTE \"FERRESUMINISTROS PARRA\"",
+      "checks": [
+        [
+          "telefono",
+          "58424703822811",
+          "584247038228"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3069",
+      "lead_id": 61213964,
+      "razon_social": "DISTRIBUIDORA ANGEL MAR, C.A.",
+      "checks": [
+        [
+          "telefono",
+          "58416133535711",
+          "584161335357"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3048",
+      "lead_id": 61213968,
+      "razon_social": "EDGAR MOLINA ALBARRAN",
+      "checks": [
+        [
+          "telefono",
+          "58412291766311",
+          "584122917663"
+        ],
+        [
+          "fecha_venc_text",
+          "11/03/2026",
+          "10/04/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3234",
+      "lead_id": 61213988,
+      "razon_social": "EHMR HABIBI, C.A.",
+      "checks": [
+        [
+          "telefono",
+          "58416379575611",
+          "584163795756"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3222",
+      "lead_id": 61213992,
+      "razon_social": "EMPRENDIMIENTO CARLOS PEREIRA",
+      "checks": [
+        [
+          "telefono",
+          "58414700075111",
+          "584147000751"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3221",
+      "lead_id": 61213998,
+      "razon_social": "EMPRENDIMIENTO FERRETERIA BERNARD SANCHEZ",
+      "checks": [
+        [
+          "telefono",
+          "58414700421411",
+          "584147004214"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3044",
+      "lead_id": 61214010,
+      "razon_social": "EMPRENDIMIENTO HILARIO MENDEZ",
+      "checks": [
+        [
+          "telefono",
+          "58424700334311",
+          "584247003343"
+        ],
+        [
+          "fecha_venc_text",
+          "11/03/2026",
+          "10/04/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "2274",
+      "lead_id": 61214014,
+      "razon_social": "EMPRENDIMIENTO HILMER MENDEZ",
+      "checks": [
+        [
+          "telefono",
+          "5841470164711",
+          "584147016470"
+        ],
+        [
+          "fecha_venc_text",
+          "29/11/2025",
+          "29/12/2025"
+        ],
+        [
+          "saldo_pendiente",
+          -1737.83,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "3043",
+      "lead_id": 61214020,
+      "razon_social": "ENDER ALEXANDER NOGUERA DUGARTE (FERREAGRO SANTA BARBARA VN)",
+      "checks": [
+        [
+          "telefono",
+          "58424581539211",
+          "584245815392"
+        ],
+        [
+          "fecha_venc_text",
+          "11/03/2026",
+          "10/04/2026"
+        ],
+        [
+          "saldo_pendiente",
+          -1548.5,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "3366",
+      "lead_id": 61214026,
+      "razon_social": "EPITACIO MONCADA / MONCADA FERRETERIA LA PRINCIPAL",
+      "checks": [
+        [
+          "telefono",
+          "58416605981111",
+          "584166059811"
+        ],
+        [
+          "fecha_venc_text",
+          "46158.0",
+          "16/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3192",
+      "lead_id": 61214030,
+      "razon_social": "FERRE AGRO E INVERSIONES DUARTE C.A",
+      "checks": [
+        [
+          "telefono",
+          "584127874411",
+          "584127874400"
+        ],
+        [
+          "fecha_venc_text",
+          "01/04/2026",
+          "01/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3227",
+      "lead_id": 61214032,
+      "razon_social": "FERRE INDUSTRIA 3 R.R.R C.A",
+      "checks": [
+        [
+          "telefono",
+          "58412016819811",
+          "584120168198"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3231",
+      "lead_id": 61214038,
+      "razon_social": "FERRE OFERTAS 210 C.A.",
+      "checks": [
+        [
+          "telefono",
+          "58416879337811",
+          "584168793378"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3363",
+      "lead_id": 61214044,
+      "razon_social": "FERRE-AGROINSUMOS REYCON C.A",
+      "checks": [
+        [
+          "telefono",
+          "58416800294111",
+          "584168002941"
+        ],
+        [
+          "fecha_venc_text",
+          "46158.0",
+          "16/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3236",
+      "lead_id": 61214046,
+      "razon_social": "FERREAGRO DIAZ PEREZ C.A",
+      "checks": [
+        [
+          "telefono",
+          "58426174429411",
+          "584261744294"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3352",
+      "lead_id": 61214052,
+      "razon_social": "FERREAGRO DIAZ PEREZ C.A",
+      "checks": [
+        [
+          "telefono",
+          "58426174429411",
+          "584261744294"
+        ],
+        [
+          "fecha_venc_text",
+          "46156.0",
+          "14/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3218",
+      "lead_id": 61214060,
+      "razon_social": "FERREAGRO EL LAZO, C.A.",
+      "checks": [
+        [
+          "telefono",
+          "58414713961111",
+          "584147139611"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3350",
+      "lead_id": 61214066,
+      "razon_social": "FERREAGRO EL LLANO C.A",
+      "checks": [
+        [
+          "telefono",
+          "58412068505711",
+          "584120685057"
+        ],
+        [
+          "fecha_venc_text",
+          "46156.0",
+          "14/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3220",
+      "lead_id": 61214070,
+      "razon_social": "FERREAGRO LAS 3K NAVARRO C.A",
+      "checks": [
+        [
+          "telefono",
+          "584141798111",
+          "584141798100"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3078",
+      "lead_id": 61214074,
+      "razon_social": "FERREAGRO LAS 3K NAVARRO C.A",
+      "checks": [
+        [
+          "telefono",
+          "584141798111",
+          "584141798100"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3238",
+      "lead_id": 61214084,
+      "razon_social": "FERREAGRO LAS 3K NAVARRO C.A",
+      "checks": [
+        [
+          "telefono",
+          "584141798111",
+          "584141798100"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3349",
+      "lead_id": 61214088,
+      "razon_social": "FERRECHIRICOA CA",
+      "checks": [
+        [
+          "telefono",
+          "58414975067711",
+          "584149750677"
+        ],
+        [
+          "fecha_venc_text",
+          "46156.0",
+          "14/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3072",
+      "lead_id": 61214092,
+      "razon_social": "FERRECHIRICOA CA",
+      "checks": [
+        [
+          "telefono",
+          "58414975067711",
+          "584149750677"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ],
+        [
+          "saldo_pendiente",
+          -135.28,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "3096",
+      "lead_id": 61214094,
+      "razon_social": "FERRESUMINISTROS LA PRIMAVERA, C.A.",
+      "checks": [
+        [
+          "telefono",
+          "58424758648811",
+          "584247586488"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ],
+        [
+          "saldo_pendiente",
+          -434.7,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "3223",
+      "lead_id": 61214098,
+      "razon_social": "FERRESUMINISTROS LA PRIMAVERA, C.A.",
+      "checks": [
+        [
+          "telefono",
+          "58424758648811",
+          "584247586488"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3224",
+      "lead_id": 61214100,
+      "razon_social": "FERRETERIA ALSEMOC C.A.",
+      "checks": [
+        [
+          "telefono",
+          "58412072442911",
+          "584120724429"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3195",
+      "lead_id": 61214106,
+      "razon_social": "FERRETERIA EL CARRIZO (H&E) C.A",
+      "checks": [
+        [
+          "telefono",
+          "58414914557211",
+          "584149145572"
+        ],
+        [
+          "fecha_venc_text",
+          "01/04/2026",
+          "01/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3346",
+      "lead_id": 61214116,
+      "razon_social": "FERRETERIA EL NARANJITO, C.A.",
+      "checks": [
+        [
+          "telefono",
+          "58412667352911",
+          "584126673529"
+        ],
+        [
+          "fecha_venc_text",
+          "46156.0",
+          "14/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "1866",
+      "lead_id": 61214122,
+      "razon_social": "FOGONERA MARKET C.A",
+      "checks": [
+        [
+          "telefono",
+          "58424728314411",
+          "584247283144"
+        ],
+        [
+          "fecha_venc_text",
+          "01/10/2025",
+          "31/10/2025"
+        ]
+      ]
+    },
+    {
+      "documento": "3046",
+      "lead_id": 61214128,
+      "razon_social": "FRANKLIN RANGEL PAEZ \"RANGEL CONSTRU-HOGAR F.P\"",
+      "checks": [
+        [
+          "telefono",
+          "58424771934511",
+          "584247719345"
+        ],
+        [
+          "fecha_venc_text",
+          "11/03/2026",
+          "10/04/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "2831",
+      "lead_id": 61214132,
+      "razon_social": "INVERSIONES AGROFERRE EXPRESS C.A",
+      "checks": [
+        [
+          "telefono",
+          "58424560869411",
+          "584245608694"
+        ],
+        [
+          "fecha_venc_text",
+          "20/02/2026",
+          "22/03/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "2734",
+      "lead_id": 61214134,
+      "razon_social": "INVERSIONES AGROFERRE EXPRESS C.A",
+      "checks": [
+        [
+          "telefono",
+          "58424560869411",
+          "584245608694"
+        ],
+        [
+          "fecha_venc_text",
+          "12/02/2026",
+          "14/03/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3102",
+      "lead_id": 61214140,
+      "razon_social": "INVERSIONES JASVETH C.A.",
+      "checks": [
+        [
+          "telefono",
+          "5841471222711",
+          "584147122270"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3348",
+      "lead_id": 61214146,
+      "razon_social": "INVERSIONES JASVETH C.A.",
+      "checks": [
+        [
+          "telefono",
+          "5841471222711",
+          "584147122270"
+        ],
+        [
+          "fecha_venc_text",
+          "46156.0",
+          "14/05/2026"
+        ]
+      ]
+    },
+    {
+      "documento": "3056",
+      "lead_id": 61214150,
+      "razon_social": "INVERSIONES JASVETH C.A.",
+      "checks": [
+        [
+          "telefono",
+          "5841471222711",
+          "584147122270"
+        ],
+        [
+          "fecha_venc_text",
+          "16/03/2026",
+          "15/04/2026"
+        ],
+        [
+          "saldo_pendiente",
+          -1548.03,
+          0.0
+        ]
+      ]
+    },
+    {
+      "documento": "3217",
+      "lead_id": 61214152,
+      "razon_social": "INVERSIONES JASVETH C.A.",
+      "checks": [
+        [
+          "telefono",
+          "5841471222711",
+          "584147122270"
+        ],
+        [
+          "fecha_venc_text",
+          "13/04/2026",
+          "13/05/2026"
+        ]
+      ]
+    }
+  ]
+}
