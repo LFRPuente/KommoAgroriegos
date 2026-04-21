@@ -134,6 +134,13 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 - New leads enter `Leads importados` (stage `103388967`).
 - The `initialStatusId` in the CFG is `103388967`.
 - Contact phone field uses ID `3270024` (was `1792418` in old account).
+- Current live ingest amount behavior, verified `2026-04-21`:
+  - `Saldo Pendiente` is loaded directly from Excel `SALDO` / `SALDO_DOC`.
+  - It is rounded with `Math.round(Math.max(0, toNumber(row.SALDO_DOC)) * 100) / 100`.
+  - It must NOT subtract Excel `PAGO`.
+  - `Pago Realizado` is set to `"0"` during Excel upsert for both new and existing leads.
+  - Excel `PAGO` is not a source of truth for Kommo `Pago Realizado`.
+  - `Pago Realizado` should only increase from chat/receipt payment processing, until a future Excel upload resets it to `0` again.
 
 ### Reminder Logic
 - The first reminder is NOT sent directly by n8n.
@@ -175,6 +182,12 @@ The migration to `agroriegoscorp` required updating ALL IDs (pipeline, stages, c
 - If payment evidence detected, routes to OCR/payment processing.
 - OCR uses OpenAI vision and updates: `Pago Realizado`, `Saldo Pendiente`, `Cobranza Ultimo Abono`, `Cobranza Ultimo Recibo Hash`
 - After applying amount, lead moves to `revisar pago` (not directly to `pagado`).
+- Payment application behavior:
+  - `Pago Realizado = pagoActual + amount`
+  - `Saldo Pendiente = saldoActual - amount`
+  - `Cobranza Ultimo Abono = amount`
+  - `Cobranza Ultimo Recibo Hash = hash`
+  - These values are applied when the chat/OCR path detects a valid payment amount, before manual review/status confirmation.
 
 ### Outbound Reply Path
 - Reply field: `Respuesta IA` (ID `3281424`)
@@ -543,3 +556,43 @@ If these tab names do not exist exactly, Google Sheets API calls will fail with 
 - Both new and overwritten Drive files trigger the workflow.
 - Double message issue resolved via Kommo "separar chat" (manual fix in UI).
 - AI Agent now explicitly mentions balance amount in conversational replies when lead is unpaid.
+
+## Verified Update (April 21, 2026)
+
+### Excel Amount Semantics Corrected
+- Live workflow reviewed: `gfJm4JUoiUi7zZgaB2ob0` (`Kommo Cuentas por Cobrar (Ingesta vía HTTP)`).
+- Workflow active at verification time.
+- Live `updatedAt`: `2026-04-21T05:23:51.214Z`.
+- `Upsert Lead+Contacto (Code)` now sets `Saldo Pendiente` directly from Excel `SALDO_DOC`:
+  - `const saldoPendiente = Math.round(Math.max(0, toNumber(row.SALDO_DOC)) * 100) / 100;`
+- The previous bug `SALDO_DOC - PAGO` is no longer present in the live upsert node.
+- `Upsert Lead+Contacto (Code)` now sends `Pago Realizado` as `"0"` during ingest:
+  - `fields.push({ field_id: CFG.fieldIds.pago_realizado, values: [{ value: "0" }] });`
+- This means a fresh Excel upload containing an existing lead will:
+  - update `Saldo Pendiente` from the new Excel `SALDO`
+  - reset `Pago Realizado` to `0`
+  - not use Excel `PAGO` as Kommo payment history
+- Current intended model:
+  - Excel `SALDO` is the source of truth for current outstanding balance at ingest time.
+  - Kommo `Pago Realizado` is only for payments detected from chat/OCR after ingest.
+  - Kommo `Ultimo Abono` and `Ultimo Hash` identify actual chat/OCR payment application.
+
+### Existing Lead Data Corrections Applied
+- The April 18 upload had loaded some leads with incorrect `Saldo Pendiente` because the old flow calculated `SALDO - PAGO`.
+- Existing Kommo leads were corrected so `Saldo Pendiente` equals Excel `SALDO`.
+- `Pago Realizado` was reset to `0` for the `70` leads where it had been populated from Excel `PAGO`.
+- Before resetting, those `70` leads had no chat/OCR payment markers:
+  - `Cobranza Ultimo Abono = 0`
+  - `Cobranza Ultimo Recibo Hash` empty
+- Therefore the reset did not erase any detected chat payment history.
+
+### Cron Simulation For April 21, 2026
+- With corrected balances, the expected `09:00` cron movements for `2026-04-21` were `47` stage changes:
+  - `5` to `atrasado_10d`
+  - `26` to `atrasado_15d`
+  - `12` to `atrasado_5d`
+  - `3` to `fecha_limite`
+  - `1` to `recordatorio_enviado`
+- Important example:
+  - Factura `2975` (`FERREAGRO E INSUMOS B.C&D C.A`) did not move on the `2026-04-20 09:00` cron because its balance was `0`/blank before correction.
+  - It should move on `2026-04-21 09:00` from `leads_importados` to `atrasado_10d` with due date `2026-04-09`.
