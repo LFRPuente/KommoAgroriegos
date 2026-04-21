@@ -69,7 +69,7 @@ function toKommoDateTime(value) {
 
 function cfPayload(row) {
   const fields = [];
-  const saldoPendiente = Math.max(0, toNumber(row.SALDO_DOC) - toNumber(row.PAGO));
+  const saldoPendiente = Math.max(0, toNumber(row.SALDO_DOC));
   fields.push({ field_id: CFG.fieldIds.documento, values: [{ value: String(row.DOCUMENTO || "") }] });
   fields.push({ field_id: CFG.fieldIds.telefono, values: [{ value: String(row.TELEFONO || "") }] });
   fields.push({ field_id: CFG.fieldIds.fecha_venc_text, values: [{ value: String(row.FECHA_VENC || "") }] });

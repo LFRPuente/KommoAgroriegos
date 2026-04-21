@@ -40,21 +40,64 @@ async function req(method, path, body) {
 function toKommoDateTime(value) {
   const raw = String(value || "").trim();
   if (!raw) return "";
-  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw;
+  // ISO datetime con hora - normalizar timezone (Z -> +00:00)
+  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) {
+    let s = raw.replace(/\.\d+/, '');
+    s = s.replace(/Z$/, '+00:00');
+    if (!/[+-]\d{2}:\d{2}$/.test(s)) s += '+00:00';
+    return s;
+  }
+  // ISO sin hora (YYYY-MM-DD)
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw + "T06:00:00+00:00";
+  // Serial de Excel (ej. 46143 = 1 mayo 2026)
+  if (/^\d+$/.test(raw)) {
+    const n = Number(raw);
+    if (n >= 36526 && n <= 73050) {
+      const ms = (n - 25569) * 86400 * 1000;
+      const d = new Date(ms);
+      if (!Number.isNaN(d.getTime())) {
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day + 'T06:00:00+00:00';
+      }
+    }
+  }
+  // DD/MM/YYYY
+  const slash = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2}|\d{4})$/);
+  if (slash) {
+    let dd = Number(slash[1]);
+    let mm = Number(slash[2]);
+    let yy = Number(slash[3]);
+    if (yy < 100) yy = yy >= 70 ? 1900 + yy : 2000 + yy;
+    if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
+      const m = String(mm).padStart(2, "0");
+      const d = String(dd).padStart(2, "0");
+      return String(yy) + '-' + m + '-' + d + 'T06:00:00+00:00';
+    }
+  }
+  // Fallback
   const d = new Date(raw);
-  if (!Number.isNaN(d.getTime())) return d.toISOString();
+  if (!Number.isNaN(d.getTime())) {
+    const y = d.getUTCFullYear();
+    const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(d.getUTCDate()).padStart(2, "0");
+    const hh = String(d.getUTCHours()).padStart(2, "0");
+    const mn = String(d.getUTCMinutes()).padStart(2, "0");
+    const ss = String(d.getUTCSeconds()).padStart(2, "0");
+    return String(y) + '-' + m + '-' + day + 'T' + hh + ':' + mn + ':' + ss + '+00:00';
+  }
   return "";
 }
 
 function cfPayload(row) {
   const fields = [];
-  const saldoPendiente = Math.max(0, toNumber(row.SALDO_DOC));
+  const saldoPendiente = Math.round(Math.max(0, toNumber(row.SALDO_DOC)) * 100) / 100;
   fields.push({ field_id: CFG.fieldIds.documento, values: [{ value: String(row.DOCUMENTO || "") }] });
   fields.push({ field_id: CFG.fieldIds.telefono, values: [{ value: String(row.TELEFONO || "") }] });
   fields.push({ field_id: CFG.fieldIds.fecha_venc_text, values: [{ value: String(row.FECHA_VENC || "") }] });
   fields.push({ field_id: CFG.fieldIds.saldo_pendiente, values: [{ value: String(saldoPendiente) }] });
-  fields.push({ field_id: CFG.fieldIds.pago_realizado, values: [{ value: String(Number(row.PAGO || 0)) }] });
+  fields.push({ field_id: CFG.fieldIds.pago_realizado, values: [{ value: "0" }] });
   fields.push({ field_id: CFG.fieldIds.razon_social, values: [{ value: String(row.RAZON_SOCIAL || "") }] });
   const dueDateTime = toKommoDateTime(row.FECHA_VENC_ISO || row.FECHA_VENC);
   if (dueDateTime) {
@@ -120,6 +163,18 @@ if (!documento || !telefono) {
       ...row,
       upsert_status: "skipped",
       upsert_reason: "missing_documento_o_telefono",
+    },
+  };
+}
+
+const saldoDoc = toNumber(row.SALDO_DOC);
+if (saldoDoc <= 0) {
+  return {
+    json: {
+      ...row,
+      upsert_status: "skipped",
+      upsert_reason: "saldo_no_positivo",
+      upsert_saldo_doc: saldoDoc,
     },
   };
 }
@@ -243,4 +298,3 @@ return {
     duplicate_match_ids: duplicateMatches.map((lead) => Number(lead.id || 0)).filter((v) => v > 0),
   },
 };
-
